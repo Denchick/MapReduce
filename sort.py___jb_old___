@@ -2,31 +2,29 @@
 
 #mktemp
 import math
+import random
+import array
+import sys
+import time
 import os
-import argparse
 
 GENERATED_FILE = 'generated.txt'
 
-
 def index_min(values):
     return min(enumerate(values), key=lambda x: x[1])[0]
-
 
 def debug(string):
     if True:
         print(string)
 
-
 def read_from_file(f, count):
     data = []
     for i in range(count):
         try:
-            temp = int(f.readline())
-            data.append(temp)
+            data.append(int(f.readline()))
         except ValueError:
-            break
-    return data
-
+            print("value error is real")
+            return data
 
 def read_first_elements_from_files(files):
     data = []
@@ -37,15 +35,17 @@ def read_first_elements_from_files(files):
             pass
     return data
 
-
-def delete(prefix, countfiles):
-    """ Удаляет временные файлы """
-    for x in (prefix + str(i) for i in range(countfiles)):
+def delete(countfiles):
+    """
+    Удаляет временные файлы.
+    countfiles - количство файлов, на которые был поделен исходный
+    """
+    #переделать
+    for x in ('part_' + str(i) for i in range(countfiles)):
         os.remove(x)
     debug('Temp files are deleted.')
 
-
-def get_opened_mapped_files(prefix):
+def open_mapped_files(prefix):
     """ Возвращает список открытых временных файлов """
     files = []
     current_index = 0
@@ -57,11 +57,9 @@ def get_opened_mapped_files(prefix):
         except FileNotFoundError:
             return files
 
-
 def close_mapped_files(files):
     for f in files:
         f.close()
-
 
 def mapper(one_piece):
     """
@@ -81,10 +79,9 @@ def mapper(one_piece):
             current_index += 1
     debug('Done!')
 
-
 def reducer(one_piece):
     debug('Reducer is start...')
-    files = get_opened_mapped_files("part_")
+    files = open_mapped_files("part_")
     with open('output', 'w') as output:
         firsts = read_first_elements_from_files(files) # Список первых элементов из всех файлов
         while True:
@@ -99,7 +96,6 @@ def reducer(one_piece):
                 firsts[index] = int(temp)
     close_mapped_files(files)
     debug('Done!')
-
 
 def parse_args():
     """Parsing arguments"""
@@ -125,11 +121,10 @@ def parse_args():
 
     return parser.parse_args()
 
-
 def main():
     one_piece = 10
     mapper(one_piece)
-    reducer(one_piece)
+    #reducer(one_piece)
 
 if __name__ == "__main__":
     main()
