@@ -1,95 +1,28 @@
 #!/usr/bin/env python3
 """ Внешняя сортировка """
 
+ERROR_EXCEPTION = 1
+ERROR_WRONG_SETTINGS = 2
+ERROR_PYTHON_VERSION = 3
+ERROR_MODULES_MISSING = 4
+
 import sys
-import os
+
+if sys.version_info < (3, 4):
+    print('Use python >= 3.4', file=sys.stderr)
+    sys.exit(ERROR_PYTHON_VERSION)
+
 import argparse
 
+try:
+    from map_reduce import extremum, map_reduce, piece, utils
+except Exception as e:
+    print('Game modules not found: "{}"'.format(e), file=sys.stderr)
+    sys.exit(ERROR_MODULES_MISSING)
 
-def debug(s, flag):
-    if flag:
-        print(s)
-
-
-class Map:
-    def mapper(count, filename):
-        """ Разделяет большой файл на несколько, 
-        в каждом из которых count значений """
-        print('Mapper is start...')
-        with open(filename, 'r') as big:
-            current_index = 0
-            while True:
-                with open('part_{}'.format(current_index), 'w') as f:
-                    data = read_from_file(big, count)
-                    if not data:
-                        break
-                    data = list(map(str, sorted(data)))
-                    f.write('\n'.join(data))
-                current_index += 1
-        debug('Готово!', flag)
-
-    def delete(prefix, countfiles):
-        """ Удаляет временные файлы """
-        for x in (prefix + str(i) for i in range(countfiles)):
-            os.remove(x)
-        debug('Временные файлы удалены.', flag)
-
-    def get_opened_mapped_files(prefix):
-        """ Возвращает список открытых временных файлов """
-        files = []
-        current_index = 0
-        while True:
-            try:
-                file_name = prefix + str(current_index)
-                files.append(open(file_name, 'r'))
-                current_index += 1
-            except FileNotFoundError:
-                return files
-    def close_mapped_files(files):
-        for f in files:
-            f.close()
-
-class Reduce:
-    def index_min(values):
-        return min(enumerate(values), key=lambda x: x[1])[0]
-
-    def read_from_file(file, count):
-        data = []
-        for i in range(count):
-            try:
-                temp = int(file.readline())
-                data.append(temp)
-            except ValueError:
-                break
-        return data
-
-    def read_first_elements_from_files(files):
-        data = []
-        for f in files:
-            try:
-                data.append(int(f.readline()))
-            except ValueError:
-                pass
-        return data
-
-    def reducer(count, output_file, flag):
-        """ Сливает много отсортированных файлов в один """
-        debug('Reducer is start...', flag)
-        files = get_opened_mapped_files("part_")
-        with open(output_file, 'w') as output:
-            firsts = read_first_elements_from_files(files) # Список первых элементов из всех файлов
-            while True:
-                index = index_min(firsts) # найдем индекс минимального элемента
-                if firsts[index] == math.inf:
-                    break
-                output.write(str(firsts[index]) + '\n') # Запишем в output наименьший элемент
-                temp = files[index].readline()
-                if temp == '':
-                    firsts[index] = math.inf #тип больше, чем макс. возможное
-                else:
-                    firsts[index] = int(temp)
-        close_mapped_files(files)
-        debug('Трах-бах, готово!', flag)
+__version__ = '1.0'
+__author__ = 'Volkov Denis'
+__email__ = 'denchick1997@mail.ru'
 
 
 def create_parser():
@@ -100,24 +33,30 @@ def create_parser():
         Выход: отсортированный файл.""".format())
 
     parser.add_argument(
-        '-f', '--filename', type=open, help='"большой файл"')
+        'filename', type=str, help='"большой файл"')
     parser.add_argument(
-        '-o', '--output', type=str, help='имя отсортированного файла')
+        '-o', '--output', type=str, help='имя отсортированного файла', default='output')
+    parser.add_argument(
+        '-t', '--temp', type=str, help='имя каталога для хранения временных файлов', default='temp')
+    parser.add_argument(
+        '-p', '--piece', type=int, help='примерное количество байт, отводимое на 1 временный файл', default=None)
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
         help='разделитель между значениями исходного файла')
     parser.add_argument(
+        '-r', '--reverse',
+        action='store_true', help='сортировка в обратном порядке', default=False)
+    parser.add_argument(
         '-d', '--debug',
         action='store_true', help='debug mode', default=False)
-
     return parser.parse_args()
 
 
 def main():
-    parser = create_parser()
-    args = parser.parse_args()
-    mapper(args.count, args.filename, args.flag)
-    reducer(args.count, args.output, args.flag)
+    args = create_parser()
+    map_reduce_obj = map_reduce.MapReduce(args.filename, args.separator, args.temp, args.piece)
+    map_reduce_obj.mapper(args.temp, args.reverse)
+    map_reduce_obj.reducer(args.output, args.separator)
 
 if __name__ == "__main__":
     main()
