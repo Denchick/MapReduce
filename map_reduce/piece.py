@@ -44,14 +44,13 @@ class Piece:
         with open(path, 'r') as f:
             f.seek(self.data_pointer)
             result = ''
-            is_first_iteration = True
             while True:
                 current = f.read(1)
-                # Если separator из нескольких символов
-                if current == '' or current == separator and not is_first_iteration:
+                if len(result) == 0 and current == separator:
+                    continue
+                if current == '' or current == separator and len(result) > 0:
                     break
-                result += separator
-                is_first_iteration = False
+                result += current
             return result
 
     def move_data_pointer(self, offset):
@@ -72,4 +71,4 @@ class Piece:
             return False
 
     def get_path(self, directory):
-        return os.path.join(directory, self.index)
+        return os.path.join(directory, str(self.index))

@@ -8,8 +8,8 @@ ERROR_MODULES_MISSING = 4
 
 import sys
 
-if sys.version_info < (3, 4):
-    print('Use python >= 3.4', file=sys.stderr)
+if sys.version_info < (3, 0):
+    print('Use python >= 3.0', file=sys.stderr)
     sys.exit(ERROR_PYTHON_VERSION)
 
 import argparse
@@ -20,7 +20,7 @@ except Exception as e:
     print('Game modules not found: "{}"'.format(e), file=sys.stderr)
     sys.exit(ERROR_MODULES_MISSING)
 
-__version__ = '1.0'
+__version__ = '0.1'
 __author__ = 'Volkov Denis'
 __email__ = 'denchick1997@mail.ru'
 

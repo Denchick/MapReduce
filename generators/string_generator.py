@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Генератор случайных строк"""
 
-
 import re
 import sys
 import random
@@ -21,8 +20,8 @@ def parse_range(string):
     a, b = int(m.group(1)), int(m.group(2))
     if a <= 0 or b <= 0:
         raise ValueError('Длина строки не может иметь не положительную длину: {}'
-            .format(min(a, b)))
-    return (min(a, b), max(a, b))
+                         .format(min(a, b)))
+    return min(a, b), max(a, b)
 
 
 def get_random_string(chars, size=(1, 10), ):
@@ -41,12 +40,13 @@ def get_alphabet(has_digits, has_upper, has_lower, has_special, flag):
     if has_special:
         chars += string.punctuation
     if not has_digits and not has_lower and not has_upper and not has_special:
-        chars = string.ascii_letters + string.digits + string.punctuation # = digits + upper + lower + special
+        chars = string.ascii_letters + string.digits + string.punctuation  # = digits + upper + lower + special
         debug('Строки будут состоять из цифр, строчных и прописных букв, специальных символов', flag)
     return chars
 
+
 def random_strings_generator(has_digits, has_upper, has_lower, has_special,
-    count, size, separator, filename, flag):
+                             count, size, separator, filename, flag):
     """ Генератор случайных строк """
     chars = get_alphabet(has_digits, has_upper, has_lower, has_special, flag)
 
@@ -58,7 +58,7 @@ def random_strings_generator(has_digits, has_upper, has_lower, has_special,
         print(get_random_string(chars, size), end=separator)
     stdout = original
     debug('Сгенерировано {} строк длинами {} в файл {}.'
-        .format(count, size, filename), flag)
+          .format(count, size, filename), flag)
 
 
 def create_parser():

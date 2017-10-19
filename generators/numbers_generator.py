@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
 """Генератор случайных чисел"""
 
-
 import re
 import sys
 import random
 import argparse
 
+
 def debug(s, flag):
     if flag:
         print(s)
+
 
 def parse_range(string):
     m = re.match(r'\((-?\d+),(-?\d+)\)$', string)
     if not m:
         raise ValueError('"{0}" не диапазон значений'.format(string))
     a, b = int(m.group(1)), int(m.group(2))
-    return (min(a, b), max(a, b))
+    return min(a, b), max(a, b)
+
 
 def numbers_generator(count_numbers, range_, filename, separator, flag):
     """	Генерация случайных чисел """
@@ -28,10 +30,9 @@ def numbers_generator(count_numbers, range_, filename, separator, flag):
         sys.stdout = open(filename, 'w')
     for count in range(count_numbers):
         print(random.randint(range_[0], range_[1]), end=separator)
-    stdout = original
+    sys.stdout = original
     debug(r'Сгенерировано {} значений в диапазоне {} в {}.'
-        .format(count_numbers, range_, filename), flag)
-
+          .format(count_numbers, range_, filename), flag)
 
 
 def create_parser():

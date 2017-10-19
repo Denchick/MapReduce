@@ -48,7 +48,6 @@ class TestUtils(unittest.TestCase):
         exp = utils.comparator('AB', 'ab', case_sensitive=False)
         self.assertEqual(exp, 0)
 
-
     def test_get_next_data_piece(self):
         def pattern_for_testing_without_exceptions(data, separator, count, expected):
             with open(self.filename, 'w') as f:
