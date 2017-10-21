@@ -3,6 +3,14 @@ import os
 
 
 def is_number(value):
+    """ Проверяет, является ли value целым числом или вещественным. 
+
+    Args:
+        value (object): значение, которое нужно проверить.
+         
+    Returns:
+        True, если value int или float, иначе False.
+    """
     try:
         float(value)
         return True
@@ -10,36 +18,28 @@ def is_number(value):
         return False
 
 
-def comparator(value1, value2, reverse=False, case_sensitive=True):
-    """ Сравнивает значения value1, value2.
-    Возвращает 0, если значения равны.
-    Возвращает 1, если value1 идет позже, чем value2
-    Возвращает -1, если value1 идет раньше, чем value2
-    """
-    if type(value1) != type(value2):
-        raise ValueError('It is impossible to compare different types: "{0}" and {1}'
-                         .format(type(value1), type(value2)))
-    if not isinstance(value1, int) and not isinstance(value1, str):
-        raise ValueError('I don\'t know how to compare "{0}"'.format(type(value1)))
-    if (value1, str) and isinstance(value2, str):
-        if not case_sensitive:
-            value1, value2 = value1.lower(), value2.lower()
-    if value1 == value2:
-        return 0
-    result = 1 if value1 > value2 else -1
-    if reverse:
-        result *= -1
-    return result
-
-
 def get_next_data_piece(file, size_of_piece, separator):
     """ Возвращает кусок данных из открытого на чтение файла file, размера 
-    минимум size_of_piece, пока не встретит separator или EOF"""
+    минимум size_of_piece, пока не встретит separator или EOF.
+
+    Args:
+        file(readable object): файл, открытый на чтение. В общем случае, объект, для которого определен метод read().
+        size_of_piece(int): примерное количество байт(нижняя граница), отводимое для одного куска файла. 
+        separator (str): разделитель между значениями.
+
+    Returns:    
+        Строку str - следующий фрагмент файла.
+
+    Raises:
+        TypeError: если size_of_piece не является целым числом.
+        TypeError: если separator не является строкой.
+        AttributeError: если file не имеет атрибут read().
+        """
     if not isinstance(size_of_piece, int):
-        raise TypeError('"size_of_piece" must be an int, but it is {0}:{1}'
+        raise TypeError('"size_of_piece" должно быть целым числом, но она {0}:{1}'
                         .format(type(size_of_piece), size_of_piece))
     if not isinstance(separator, str):
-        raise TypeError('"separator" must be an str, but it is {0}:{1}'
+        raise TypeError('"separator" должен быть строкой str, но он {0}:{1}'
                         .format(type(separator), separator))
     try:
         result = file.read(size_of_piece)
@@ -52,23 +52,45 @@ def get_next_data_piece(file, size_of_piece, separator):
                 current = file.read(1)
         return result
     except AttributeError:
-        raise AttributeError("Attribute 'file' is not readable")
+        raise AttributeError("Атрибут 'file' не имеет метода read()")
 
 
 def check_directory_path(directory):
+    """ Проверяет, что папка directory существует. 
+        
+    Returns:
+        Если папка существует, возвращается True.
+        
+    Raises:
+        TypeError: если directory не является строкой.
+        FileNotFoundError: если пути directory не существует.
+        NotADirectoryError: если directory - не папка, а файл.
+
+    """
     if not isinstance(directory, str):
-        raise TypeError("Name of directory where lies piece must be a string")
+        raise TypeError("Имя папки должно быть строкой, но оно {0}.".format(type(directory)))
     if not os.path.exists(directory):
-        raise FileNotFoundError("Directory '{0}' is not exists".format(directory))
+        raise FileNotFoundError("Такой директории не существует: {0}.".format(directory))
     if not os.path.isdir(directory):
-        raise NotADirectoryError("Expected that '{}' is directory".format(directory))
+        raise NotADirectoryError("Ожидалось, что '{}' директория, но это файл.".format(directory))
     return True
 
 
 def check_file_path(path):
+    """ Проверяет, что файл по пути path существует.
+    
+    Args:
+        path: путь до файла.
+
+    Raises:
+        TypeError: если path не является строкой.
+        FileNotFoundError: если файла по пути path не существует.
+
+    Returns:
+        True, если файл существует.
+    """
     if not isinstance(path, str):
-        print(path)
-        raise TypeError("Path must be a string")
+        raise TypeError("Путь до файла должен быть строкой")
     if not os.path.exists(path):
-        raise FileNotFoundError("File '{0}' does not exist".format(path))
+        raise FileNotFoundError("Файла '{0}' не существует".format(path))
     return True
