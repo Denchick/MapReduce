@@ -5,14 +5,16 @@ import re
 import sys
 import random
 import argparse
+import logging
 
 
-def debug(s, flag):
-    if flag:
-        print(s)
+__version__ = '1.0'
+__author__ = 'Volkov Denis'
+__email__ = 'denchick1997@mail.ru'
 
 
 def parse_range(string):
+    """ Парсит строку с диапазоном генерируемых значений """
     m = re.match(r'\((-?\d+),(-?\d+)\)$', string)
     if not m:
         raise ValueError('"{0}" не диапазон значений'.format(string))
@@ -20,51 +22,57 @@ def parse_range(string):
     return min(a, b), max(a, b)
 
 
-def numbers_generator(count_numbers, range_, filename, separator, flag):
+def numbers_generator(count_numbers, range_, filename, separator):
     """	Генерация случайных чисел """
     if count_numbers < 0:
         raise ValueError("Нельзя сгенерировать {} значений".format(count_numbers))
-    debug('Запуск генерации.', flag)
+    logging.info('Запуск генерации.')
     original = sys.stdout
     if filename is not None:
         sys.stdout = open(filename, 'w')
     for count in range(count_numbers):
         print(random.randint(range_[0], range_[1]), end=separator)
     sys.stdout = original
-    debug(r'Сгенерировано {} значений в диапазоне {} в {}.'
-          .format(count_numbers, range_, filename), flag)
+    logging.info('Сгенерировано {} значений в диапазоне {} в {}.'
+                 .format(count_numbers, range_, 'stdout' if filename is None else filename))
 
 
 def create_parser():
+    description = """ Генератор случайных чисел. 
+    По умолчанию генерирует 10 чисел из диапазона (-100, 100), включая границы, разделенные переносом строки. """
     parser = argparse.ArgumentParser(
-        description='Генерация большого файла случайных чисел'.format())
-
+        description=description)
     parser.add_argument(
-        '-o', '--output', type=str, help='имя выходного файла')
+        '-o', '--output', type=str, help='Имя выходного файла. По умолчанию выход направлен в stdout.')
     parser.add_argument(
         '-r', '--range', type=parse_range, default=(-100, 100),
-        help='диапазон генерируемых значений. Пример: (-100,100)')
+        help='Диапазон генерируемых чисел в формате (leftBorder, rightBorder). Границы включаются. Пример: (-100,100)')
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
-        help='разделитель значений')
+        help='Разделитель между значениями.')
     parser.add_argument(
         '-c', '--count', type=int, default=10,
-        help='количество генерируемых значений')
+        help='Количество генерируемых значений.')
     parser.add_argument(
         '-d', '--debug',
-        action='store_true', help='debug mode', default=False)
+        action='store_true', help='Режим debug.', default=False)
 
     return parser.parse_args()
 
 
 def main():
+    log_format = '%(asctime)s [%(levelname)s <%(name)s>] %(message)s'
+    args = create_parser()
+    logging.basicConfig(filename="numbers_generator.log",
+                        level=logging.DEBUG if args.debug else logging.ERROR,
+                        format=log_format,
+                        filemode='w')
     args = create_parser()
     numbers_generator(
         args.count,
         args.range,
         args.output,
-        args.separator,
-        args.debug)
+        args.separator,)
 
 
 if __name__ == "__main__":
