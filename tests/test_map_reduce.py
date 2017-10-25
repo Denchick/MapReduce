@@ -11,7 +11,8 @@ from map_reduce import map_reduce
 class TestMapReduce(unittest.TestCase):
     def setUp(self):
         """ Создает в папке temp файлы для тестов """
-        self.directory = 'temp_test'
+
+        self.directory = 'test_temp'
         os.mkdir(self.directory)
 
         self.input_filename = 'input_test.txt'
@@ -22,7 +23,6 @@ class TestMapReduce(unittest.TestCase):
 
     def tearDown(self):
         """ Удаляет папку temp со всем содержимым и файлы входа и выхода"""
-        shutil.rmtree(self.directory, ignore_errors=False, onerror=None)
         os.remove(self.input_filename)
         os.remove(self.output_filename)
 
@@ -71,7 +71,7 @@ class TestMapReduce(unittest.TestCase):
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('1 2 3 4', actual)
 
-    def test_correct_thatNumbersNotRecognizedAdStrings(self):
+    def test_correct_thatNumbersNotRecognizedAdStringsInPiece(self):
         data = '11 1 2'
         self.create_file_for_sorting(data)
 
@@ -86,6 +86,22 @@ class TestMapReduce(unittest.TestCase):
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('1 2 11', actual)
+
+    def test_correct_thatNumbersNotRecognizedAdStringsAtAll(self):
+        data = '\n'.join('94 96 6 97 99 100 0'.split())
+        self.create_file_for_sorting(data)
+
+        map_reduce.MapReduce(
+            input_filename=self.input_filename,
+            output_filename=self.output_filename,
+            separator='\n',
+            temp_directory=self.directory,
+            size_of_one_piece=4,
+            reverse=False,
+            debug=False)
+
+        actual = self.get_data_from_file(self.output_filename)
+        self.assertEqual('0 6 94 96 97 99 100', actual.replace('\n', ' ', 10))
 
     def test_correctSort_lenghtInputFileAndOutputFileAreEquals(self):
         data = '18 20 4 2 19 5 16 14 1 17 6 13 10 15 8 3 11 12 7 9'
@@ -104,7 +120,7 @@ class TestMapReduce(unittest.TestCase):
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual(expected, actual)
 
-    def test_correctSort_thanReverse(self):
+    def test_correctSort_whenReverse(self):
         data = '4 1 3 2'
         self.create_file_for_sorting(data)
 
@@ -120,7 +136,21 @@ class TestMapReduce(unittest.TestCase):
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('4 3 2 1', actual)
 
+    def test_correctSort_whenPositiveAndNegativeNumbers(self):
+        data = '0 1 -1 2 -2 3 -3 4 -4 5 -5'
+        self.create_file_for_sorting(data)
 
+        map_reduce.MapReduce(
+            input_filename=self.input_filename,
+            output_filename=self.output_filename,
+            separator=' ',
+            temp_directory=self.directory,
+            size_of_one_piece=4,
+            reverse=False,
+            debug=False)
+
+        actual = self.get_data_from_file(self.output_filename)
+        self.assertEqual('-5 -4 -3 -2 -1 0 1 2 3 4 5', actual)
 
 if __name__ == "__main__":
     unittest.main()

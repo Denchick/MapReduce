@@ -46,13 +46,14 @@ def create_parser():
         '-o', '--output', type=str, help='Имя выходного файла. По умолчанию выход направлен в stdout.')
     parser.add_argument(
         '-r', '--range', type=parse_range, default=(-100, 100),
-        help='Диапазон генерируемых чисел в формате (leftBorder, rightBorder). Границы включаются. Пример: (-100,100)')
+        help="""Диапазон генерируемых чисел в формате (leftBorder, rightBorder). Границы включаются. 
+        По умолчанию (-100,100).""")
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
-        help='Разделитель между значениями.')
+        help='Разделитель между значениями. По умолчанию перевод строки - \\n.')
     parser.add_argument(
         '-c', '--count', type=int, default=10,
-        help='Количество генерируемых значений.')
+        help='Количество генерируемых значений. По умолчанию 10.')
     parser.add_argument(
         '-d', '--debug',
         action='store_true', help='Режим debug.', default=False)
@@ -72,7 +73,7 @@ def main():
         args.count,
         args.range,
         args.output,
-        args.separator,)
+        args.separator.encode().decode('unicode-escape'))
 
 
 if __name__ == "__main__":

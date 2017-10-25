@@ -84,7 +84,7 @@ class MapReduce:
         if not isinstance(self.reverse, bool):
             raise TypeError("flag reverse must be a bool, but got {0}:{1}".format(type(self.reverse), self.reverse))
 
-        print('Mapper is start...')
+        #print('Mapper is start...')
         try:
             utils.check_directory_path(self.temp_directory)
         except FileNotFoundError:
@@ -99,15 +99,11 @@ class MapReduce:
                 piece_data = utils.get_next_data_piece(source_file, self.size_of_one_piece, self.separator)
                 if len(piece_data) == 0:
                     break
-                try:
-                    piece_data = self.separator.join(
-                        sorted(piece_data.split(self.separator), reverse=self.reverse, key=self.key_sort_piece))
-                except TypeError:
-                    print('"{0}"'.format(self.reverse))
-                    exit()
+                piece_data = self.separator.join(
+                    sorted(piece_data.split(self.separator), reverse=self.reverse, key=self.key_sort_piece))
                 self.pieces.append(
                     piece.Piece(len(self.pieces), piece_data, self.temp_directory))
-        print('Done!')
+        #print('Done!')
 
     def reducer(self):
         """ Сливает много отсортированных файлов обратно в 1 файл. 
@@ -116,7 +112,7 @@ class MapReduce:
         на верхний элемент сдвигается на следующий после него элемент. Если кусок прочитан до конца, то он становится 
         None. Алгоритм заканчивает свою работу, когда все кусочки были дочитаны до конца, то есть стали None.
         """
-        print('Reducer is  start...')
+        #print('Reducer is  start...')
         with open(self.output_filename, 'w') if self.output_filename is not None else sys.stdout as output:
             while True:
                 extr = None                 # Найдем экстремум.
@@ -138,7 +134,7 @@ class MapReduce:
                 extr.piece_obj.move_data_pointer(len(extr.data) + len(self.separator))
                 if extr.piece_obj.is_empty(self.temp_directory):
                     self.pieces[extr.piece_obj.index] = None
-        print('Done!')
+        #print('Done!')
 
     def clean_up(self, is_debug=False):
         if not is_debug:

@@ -52,16 +52,28 @@ def create_parser():
         '-d', '--debug', action='store_true', default=False, help="""Режим debug. Временные файлы не удаляются. Warning! 
         В этом режиме папку с временными файлами необходимо удалять самостоятельно во избежание падения утилиты.""" )
     return parser.parse_args()
+ #
+ # def __init__(self, input_filename='input.txt',
+ #                 output_filename='output.txt',
+ #                 separator=' ',
+ #                 temp_directory='temp',
+ #                 size_of_one_piece=100,
+ #                 case_sensitive=True,
+ #                 reverse=False,
+ #                 debug=False):
 
 
 def main():
     args = create_parser()
     map_reduce.MapReduce(
-        args.filename,
-        args.separator,
-        args.temp,
-        args.piece,
-        args.case_sensitive)
+        input_filename=args.filename,
+        output_filename=args.output,
+        separator=args.separator.encode().decode('unicode-escape'),
+        temp_directory=args.temp,
+        size_of_one_piece=args.piece,
+        case_sensitive=args.case_sensitive,
+        reverse=args.reverse,
+        debug=args.debug)
 
 
 if __name__ == "__main__":
