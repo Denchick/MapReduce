@@ -13,6 +13,8 @@ class Piece:
         """
         if not isinstance(index, int):
             raise TypeError("Index куска должен быть целым числом")
+        if not isinstance(data, str):
+            raise TypeError("Название директории должно быть строкой, но {0}:{1}".format(type(data), data))
         utils.check_directory_path(directory)
 
         self.index = index
@@ -49,7 +51,7 @@ class Piece:
         with open(path, 'r') as f:
             return f.read()
 
-    def get_up_element(self, directory):
+    def get_up_element(self, directory, separator):
         """ Получает верхний элемент куска.
         Читает строку в файле, начиная с указателя на верхний элемент. При этом, указатель не смещается. 
 
@@ -60,7 +62,15 @@ class Piece:
         path = self.get_path(directory)
         with open(path, 'r') as f:
             f.seek(self.data_pointer)
-            return f.readline()
+            result = ''
+            while True:
+                current = f.read(1)
+                if len(result) == 0 and current == separator:
+                    continue
+                if current == '' or current == separator and len(result) > 0:
+                    break
+                result += current
+            return result
 
     def move_data_pointer(self, offset):
         """ Смещает указатель на верхний элемент куска на offset байт

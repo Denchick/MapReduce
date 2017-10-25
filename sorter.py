@@ -20,7 +20,7 @@ except Exception as e:
     print('Модули не найдены: "{}"'.format(e), file=sys.stderr)
     sys.exit(ERROR_MODULES_MISSING)
 
-__version__ = '0.11'
+__version__ = '0.2'
 __author__ = 'Volkov Denis'
 __email__ = 'denchick1997@mail.ru'
 
@@ -28,35 +28,41 @@ __email__ = 'denchick1997@mail.ru'
 def create_parser():
     """ Разбор аргументов командной строки """
     parser = argparse.ArgumentParser(
-        description="""Внешняя сортировка большого файла, не помещающегося в память.
-        Вход: файл, который нужно отсортировать.
-        Выход: отсортированный файл.""")
+        description="""Внешняя сортировка файла, не помещающегося в оперативную память. Если не указывать файл, 
+        то данные будут браться из sys.stdin.""")
 
     parser.add_argument(
-        'filename', type=str, help='"большой файл"')
+        '-f', '--filename', type=str, help='Файл, который необходимо отсортировать. По умолчанию stdin.')
     parser.add_argument(
-        '-o', '--output', type=str, help='имя отсортированного файла', default='output')
+        '-o', '--output', type=str, help='Название выхода - отсортированного файла. По умолчанию stdout.')
     parser.add_argument(
-        '-t', '--temp', type=str, help='имя каталога для хранения временных файлов', default='temp')
+        '-t', '--temp', type=str,
+        help='Название каталога для хранения временных файлов.', default='4addf7826094555610bc0d0638e01295')
     parser.add_argument(
-        '-p', '--piece', type=int, help='примерное количество байт, отводимое на 1 временный файл', default=None)
+        '-p', '--piece', type=int, default=100,
+        help='Примерное количество байт, которое можно использовать в оперативной памяти.')
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
-        help='разделитель между значениями исходного файла')
+        help='Разделитель между значениями в исходном и отсортированном файле.')
     parser.add_argument(
-        '-r', '--reverse',
-        action='store_true', help='сортировка в обратном порядке', default=False)
+        '-r', '--reverse', action='store_true', default=False, help='Сортировка в обратном порядке')
     parser.add_argument(
-        '-d', '--debug',
-        action='store_true', help='debug mode', default=False)
+        '-c', '--case_sensitive', action='store_true', default=False, help='Регистрозависимая сортировка строк.')
+    parser.add_argument(
+        '-d', '--debug', action='store_true', default=False, help="""Режим debug. Временные файлы не удаляются. Warning! 
+        В этом режиме папку с временными файлами необходимо удалять самостоятельно во избежание падения утилиты.""" )
     return parser.parse_args()
 
 
 def main():
     args = create_parser()
-    map_reduce_obj = map_reduce.MapReduce(args.filename, args.separator, args.temp, args.piece)
-    map_reduce_obj.mapper(args.temp, args.reverse)
-    map_reduce_obj.reducer(args.output, args.separator)
+    map_reduce.MapReduce(
+        args.filename,
+        args.separator,
+        args.temp,
+        args.piece,
+        args.case_sensitive)
+
 
 if __name__ == "__main__":
     main()

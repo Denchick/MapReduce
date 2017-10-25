@@ -90,7 +90,7 @@ def create_parser():
         help='Диапазон длин генерируемых строк в формате (leftBorder, rightBorder). Границы включаются. Пример: (6,18)')
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
-        help='Разделитель между строками.')
+        help='Разделитель между строками. По умолчанию это перевод строки.')
     parser.add_argument(
         '-o', '--output', type=str, help='Имя выходного файла. По умолчанию выход направлен в stdout.')
     parser.add_argument(

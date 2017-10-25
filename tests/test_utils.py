@@ -15,39 +15,6 @@ class TestUtils(unittest.TestCase):
         if os.path.exists(self.filename):
             os.remove(self.filename)
 
-    def test_comparator(self):
-        exp = utils.comparator(10, 10)
-        self.assertEqual(exp, 0)
-        # на равные элементы реверс не действует
-        exp = utils.comparator(10, 10, reverse=True)
-        self.assertEqual(exp, 0)
-        exp = utils.comparator(-2, 2)
-        self.assertEqual(exp, -1)
-
-        exp = utils.comparator('kek', 'kek')
-        self.assertEqual(exp, 0)
-        # Работает с кириллицей
-        exp = utils.comparator('лол', 'лол')
-        self.assertEqual(exp, 0)
-        # Работает даже с иероглифами
-        exp = utils.comparator('彐丅口 中认闩匚片口, 石卩闩丅闩卄', '彐丅口 中认闩匚片口, 石卩闩丅闩卄')
-        self.assertEqual(exp, 0)
-        # лексикографическое сравнение строк
-        exp = utils.comparator('abc', 'abd')
-        self.assertEqual(exp, -1)
-        # в обратном порядке
-        exp = utils.comparator('abc', 'abd', reverse=True)
-        self.assertEqual(exp, 1)
-        # длина строк
-        exp = utils.comparator('aaa', 'a')
-        self.assertEqual(exp, 1)
-        # Регистро-зависимая
-        exp = utils.comparator('AB', 'ab', case_sensitive=True)
-        self.assertEqual(exp, -1)
-        # Регистро-независимая
-        exp = utils.comparator('AB', 'ab', case_sensitive=False)
-        self.assertEqual(exp, 0)
-
     def test_get_next_data_piece(self):
         def pattern_for_testing_without_exceptions(data, separator, count, expected):
             with open(self.filename, 'w') as f:
