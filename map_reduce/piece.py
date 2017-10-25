@@ -89,6 +89,28 @@ class Piece:
                 "Невозможно сдвинуться на {0} байт, т.к. указатель на верхний элемент будет < 0".format(offset))
         self.data_pointer += offset
 
+    def delete_up_element(self, directory, separator):
+        """ Получает верхний элемент куска.
+        Читает строку в файле, начиная с указателя на верхний элемент. При этом, указатель не смещается. 
+
+        Args:
+            directory(str): папка, в которой хранятся временные файлы - куски.
+        """
+        utils.check_directory_path(directory)
+        path = self.get_path(directory)
+        with open(path, 'r') as f:
+            f.seek(self.data_pointer)
+            result = ''
+            while True:
+                current = f.read(1)
+                self.data_pointer += 1
+                if len(result) == 0 and current == separator:
+                    continue
+                if current == '' or current == separator and len(result) > 0:
+                    break
+                result += current
+
+
     def is_empty(self, directory):
         """ Проверяет, прочитан ли до конца кусок. 
 

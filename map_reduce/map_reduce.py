@@ -131,7 +131,7 @@ class MapReduce:
 
                 # экстремум найден, теперь его нужно удалить из соответствующего файла и положить в output.
                 output.write(extr.data + self.separator)
-                extr.piece_obj.move_data_pointer(len(extr.data) + len(self.separator))
+                extr.piece_obj.delete_up_element(self.temp_directory, self.separator)
                 if extr.piece_obj.is_empty(self.temp_directory):
                     self.pieces[extr.piece_obj.index] = None
         #print('Done!')
