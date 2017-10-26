@@ -13,6 +13,7 @@ if sys.version_info < (3, 0):
     sys.exit(ERROR_PYTHON_VERSION)
 
 import argparse
+import logging
 
 try:
     from map_reduce import extremum, map_reduce, piece, utils
@@ -24,6 +25,9 @@ __version__ = '0.2'
 __author__ = 'Volkov Denis'
 __email__ = 'denchick1997@mail.ru'
 
+LOGGER_NAME = 'sorter'
+LOGGER = logging.getLogger(LOGGER_NAME)
+
 
 def create_parser():
     """ Разбор аргументов командной строки """
@@ -32,9 +36,11 @@ def create_parser():
         то данные будут браться из sys.stdin.""")
 
     parser.add_argument(
-        '-f', '--filename', type=str, help='Файл, который необходимо отсортировать. По умолчанию stdin.')
+        '-f', '--filename', type=str,
+        help='Файл, который необходимо отсортировать. По умолчанию данные берутся из stdin.')
     parser.add_argument(
-        '-o', '--output', type=str, help='Название выхода - отсортированного файла. По умолчанию stdout.')
+        '-o', '--output', type=str,
+        help='Название выхода - отсортированного файла. По умолчанию данные направлены в stdout.')
     parser.add_argument(
         '-t', '--temp', type=str,
         help='Название каталога для хранения временных файлов.', default='4addf7826094555610bc0d0638e01295')
@@ -43,28 +49,31 @@ def create_parser():
         help='Примерное количество байт, которое можно использовать в оперативной памяти.')
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
-        help='Разделитель между значениями в исходном и отсортированном файле.')
+        help='Разделитель между значениями в исходном и отсортированном файле. По умолчанию перевод строки.')
     parser.add_argument(
         '-r', '--reverse', action='store_true', default=False, help='Сортировка в обратном порядке')
     parser.add_argument(
         '-c', '--case_sensitive', action='store_true', default=False, help='Регистрозависимая сортировка строк.')
     parser.add_argument(
         '-d', '--debug', action='store_true', default=False, help="""Режим debug. Временные файлы не удаляются. Warning! 
-        В этом режиме папку с временными файлами необходимо удалять самостоятельно во избежание падения утилиты.""" )
+        В этом режиме папку с временными файлами необходимо удалять самостоятельно во избежание падения утилиты.""")
     return parser.parse_args()
- #
- # def __init__(self, input_filename='input.txt',
- #                 output_filename='output.txt',
- #                 separator=' ',
- #                 temp_directory='temp',
- #                 size_of_one_piece=100,
- #                 case_sensitive=True,
- #                 reverse=False,
- #                 debug=False):
 
 
 def main():
     args = create_parser()
+
+    log = logging.StreamHandler(sys.stderr)
+    log.setFormatter(logging.Formatter(
+        '%(asctime)s [%(levelname)s <%(name)s>] %(message)s'))
+
+    for module in (sys.modules[__name__], map_reduce):
+        logger = logging.getLogger(module.LOGGER_NAME)
+        logger.setLevel(logging.DEBUG if args.debug else logging.ERROR)
+        logger.addHandler(log)
+
+    LOGGER.info('Application is start.')
+
     map_reduce.MapReduce(
         input_filename=args.filename,
         output_filename=args.output,
