@@ -27,12 +27,9 @@ def numbers_generator(count_numbers, range_, filename, separator):
     if count_numbers < 0:
         raise ValueError("Нельзя сгенерировать {} значений".format(count_numbers))
     logging.info('Запуск генерации.')
-    original = sys.stdout
-    if filename is not None:
-        sys.stdout = open(filename, 'w')
-    for count in range(count_numbers):
-        print(random.randint(range_[0], range_[1]), end=separator)
-    sys.stdout = original
+    with open(filename, 'w') if filename is not None else sys.stdout as f:
+        for count in range(count_numbers):
+            print(random.randint(range_[0], range_[1]), end=separator)
     logging.info('Сгенерировано {} значений в диапазоне {} в {}.'
                  .format(count_numbers, range_, 'stdout' if filename is None else filename))
 

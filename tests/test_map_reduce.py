@@ -13,13 +13,10 @@ class TestMapReduce(unittest.TestCase):
         """ Создает в папке temp файлы для тестов """
 
         self.directory = 'test_temp'
-        os.mkdir(self.directory)
-
+        os.makedirs(self.directory, exist_ok=True)
         self.input_filename = 'input_test.txt'
         self.output_filename = 'output_test.txt'
-
         self.separator = ' '
-        self.count = 20
 
     def tearDown(self):
         """ Удаляет папку temp со всем содержимым и файлы входа и выхода"""
@@ -151,6 +148,23 @@ class TestMapReduce(unittest.TestCase):
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('-5 -4 -3 -2 -1 0 1 2 3 4 5', actual)
+
+    def test_correctSort_whenTempDirectoryIsTempfileModule(self):
+        data = '4 1 3 2'
+        self.create_file_for_sorting(data)
+
+        map_reduce.MapReduce(
+            input_filename=self.input_filename,
+            output_filename=self.output_filename,
+            separator=' ',
+            temp_directory=None,
+            size_of_one_piece=10,
+            reverse=False,
+            debug=False)
+
+        actual = self.get_data_from_file(self.output_filename)
+        self.assertEqual('1 2 3 4', actual)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -24,10 +24,10 @@ class TestPiece(unittest.TestCase):
             piece.Piece(1, ['not_string'], '')
         with self.assertRaises(TypeError):
             piece.Piece(1, 'kek', 123)
-        with self.assertRaises(FileNotFoundError):
+        with self.assertRaises(AttributeError):
             piece.Piece(1, 'kek', 'directory_is_definitely_not_exists')
 
-        with self.assertRaises(NotADirectoryError):
+        with self.assertRaises(AttributeError):
             with open('just_file', 'w') as f:
                 piece.Piece(1, 'kek', 'just_file')
         os.remove('just_file')

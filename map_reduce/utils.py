@@ -36,15 +36,13 @@ def get_next_data_piece(file, size_of_piece, separator):
         AttributeError: если file не имеет атрибут read().
         """
     if not isinstance(size_of_piece, int):
-        raise TypeError('"size_of_piece" должно быть целым числом, но она {0}:{1}'
-                        .format(type(size_of_piece), size_of_piece))
+        raise TypeError('"Size of one piece must be an integer but {0}:{1}'.format(type(size_of_piece), size_of_piece))
     if not isinstance(separator, str):
-        raise TypeError('"separator" должен быть строкой str, но он {0}:{1}'
-                        .format(type(separator), separator))
+        raise TypeError('Separator must be a string, but {0}:{1}'.format(type(separator), separator))
     try:
         result = file.read(size_of_piece)
         if result.endswith(separator):
-            result = result[:len(result) - len(separator)]
+            result = result[:-len(separator)]
         else:
             current = file.read(1)
             while current != '' and current != separator:
@@ -52,28 +50,7 @@ def get_next_data_piece(file, size_of_piece, separator):
                 current = file.read(1)
         return result
     except AttributeError:
-        raise AttributeError("Атрибут 'file' не имеет метода read()")
-
-
-def check_directory_path(directory):
-    """ Проверяет, что папка directory существует. 
-        
-    Returns:
-        Если папка существует, возвращается True.
-        
-    Raises:
-        TypeError: если directory не является строкой.
-        FileNotFoundError: если пути directory не существует.
-        NotADirectoryError: если directory - не папка, а файл.
-
-    """
-    if not isinstance(directory, str):
-        raise TypeError("Имя папки должно быть строкой, но оно {0}.".format(type(directory)))
-    if not os.path.exists(directory):
-        raise FileNotFoundError("Такой директории не существует: {0}.".format(directory))
-    if not os.path.isdir(directory):
-        raise NotADirectoryError("Ожидалось, что '{}' директория, но это файл.".format(directory))
-    return True
+        raise AttributeError("'file' attribute must have a read() method")
 
 
 def check_file_path(path):
@@ -90,7 +67,15 @@ def check_file_path(path):
         True, если файл существует.
     """
     if not isinstance(path, str):
-        raise TypeError("Путь до файла должен быть строкой")
+        raise TypeError("Path to file must be a string")
     if not os.path.exists(path):
-        raise FileNotFoundError("Файла '{0}' не существует".format(path))
+        raise FileNotFoundError("File '{0}' does not exist.".format(path))
     return True
+
+def determine_size_of_one_piece():
+    try:
+        import psutil
+        return psutil.virtual_memory().free // 10
+    except ImportError:
+        return 2 * 1024 * 1024 * 1024 // 10
+

@@ -12,15 +12,16 @@ class Piece:
             directory(str): папка для хранения временных файлов - кусков. 
         """
         if not isinstance(index, int):
-            raise TypeError("Index куска должен быть целым числом")
+            raise TypeError("Index of piece must be an integer but {0}:{1}.".format(type(index), index))
         if not isinstance(data, str):
-            raise TypeError("Название директории должно быть строкой, но {0}:{1}".format(type(data), data))
-        utils.check_directory_path(directory)
+            raise TypeError("Name of directory must be a string but {0}:{1}.".format(type(data), data))
+        if not os.path.isdir(directory):
+            raise AttributeError("Directory path '{0}' is incorrect".format(directory))
 
         self.index = index
         self.data_pointer = 0  # каретка
         if os.path.exists(self.get_path(directory)):
-            raise RuntimeWarning('Файл с индексом {0} уже существует'.format(self.index))
+            raise RuntimeWarning('File with {0} index already exists.'.format(self.index))
         self.write_to_filename(data, directory)
 
     def write_to_filename(self, data, directory):
@@ -33,9 +34,10 @@ class Piece:
         Raises:
             TypeError: если data не строка.
         """
-        utils.check_directory_path(directory)
+        if not os.path.isdir(directory):
+            raise AttributeError("Directory path '{0}' is incorrect".format(directory))
         if not isinstance(data, str):
-            raise TypeError("data должна быть строкой, а не {0}".format(type(data)))
+            raise TypeError("Data must be a string but {0}".format(type(data), data))
         path = self.get_path(directory)
         with open(path, 'w') as f:
             f.write(data)
@@ -47,7 +49,8 @@ class Piece:
             directory(str): папка, в которой хранятся временные файлы - куски.       
         """
         path = self.get_path(directory)
-        utils.check_file_path(path)
+        if not os.path.isdir(directory):
+            raise AttributeError("Directory path '{0}' is incorrect".format(directory))
         with open(path, 'r') as f:
             return f.read()
 
@@ -57,20 +60,22 @@ class Piece:
 
         Args:
             directory(str): папка, в которой хранятся временные файлы - куски.
+            separator: разделитель между значениями.
         """
-        utils.check_directory_path(directory)
+        if not os.path.isdir(directory):
+            raise AttributeError("Directory path '{0}' is incorrect".format(directory))
         path = self.get_path(directory)
         with open(path, 'r') as f:
             f.seek(self.data_pointer)
-            result = ''
+            result = []
             while True:
                 current = f.read(1)
-                if len(result) == 0 and current == separator:
+                if not result and current == separator:
                     continue
-                if current == '' or current == separator and len(result) > 0:
+                if not current or current == separator and result:
                     break
-                result += current
-            return result
+                result.append(current)
+            return ''.join(result)
 
     def move_data_pointer(self, offset):
         """ Смещает указатель на верхний элемент куска на offset байт
@@ -83,33 +88,35 @@ class Piece:
             RuntimeError: если после смещения указатель на верхний элемент становится отрицательным.
         """
         if not isinstance(offset, int):
-            raise TypeError("Смещение должно быть целым числом, но оказалось {0}.".format(type(offset)))
+            raise TypeError("Offset must be an integer but {0}.".format(type(offset), offset))
         if self.data_pointer + offset < 0:
             raise RuntimeError(
-                "Невозможно сдвинуться на {0} байт, т.к. указатель на верхний элемент будет < 0".format(offset))
+                "Impossible to move on {0} bytes because pointer would be negative.".format(offset))
         self.data_pointer += offset
 
     def delete_up_element(self, directory, separator):
-        """ Получает верхний элемент куска.
+        """ Удаляет верхний элемент куска.
         Читает строку в файле, начиная с указателя на верхний элемент. При этом, указатель не смещается. 
 
         Args:
             directory(str): папка, в которой хранятся временные файлы - куски.
+            separator: разделитель между значениями.
         """
-        utils.check_directory_path(directory)
+        if not os.path.isdir(directory):
+            raise AttributeError("Directory path '{0}' is incorrect".format(directory))
+
         path = self.get_path(directory)
         with open(path, 'r') as f:
             f.seek(self.data_pointer)
-            result = ''
+            is_get_any_bytes = False
             while True:
                 current = f.read(1)
                 self.data_pointer += 1
-                if len(result) == 0 and current == separator:
+                if not is_get_any_bytes and current == separator:
                     continue
-                if current == '' or current == separator and len(result) > 0:
+                if not current or current == separator and is_get_any_bytes:
                     break
-                result += current
-
+                is_get_any_bytes = True
 
     def is_empty(self, directory):
         """ Проверяет, прочитан ли до конца кусок. 

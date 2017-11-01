@@ -1,8 +1,8 @@
 import os
 import shutil
 import logging
-import psutil
 import sys
+import tempfile
 
 from . import extremum, piece, utils
 
@@ -11,14 +11,15 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 
 
 class MapReduce:
-    def __init__(self, input_filename='input.txt',
-                 output_filename='output.txt',
-                 separator=' ',
-                 temp_directory='temp',
-                 size_of_one_piece=100,
-                 case_sensitive=True,
-                 reverse=False,
-                 debug=False):
+    def __init__(self, input_filename: str,
+                 output_filename: str,
+                 separator: str,
+                 temp_directory: str,
+                 size_of_one_piece: int,
+                 case_sensitive: bool = True,
+                 reverse: bool = False,
+                 debug: bool = False,
+                 *args):
         """ Конcтруктор класса MapReduce.
         
         Args:
@@ -32,7 +33,10 @@ class MapReduce:
         self.input_filename = input_filename
         self.output_filename = output_filename
         self.separator = separator
-        self.temp_directory = temp_directory
+
+        self.temp_directory_object = tempfile.TemporaryDirectory() if not temp_directory else None
+        self.temp_directory = self.temp_directory_object.name if not temp_directory else temp_directory
+
         self.size_of_one_piece = size_of_one_piece
         self.case_sensitive = case_sensitive
         self.reverse = reverse
@@ -74,7 +78,7 @@ class MapReduce:
             if self.case_sensitive:
                 return obj
             return obj.lower()
-        raise TypeError("Я (пока) не умею сравнивать объекты типа {0}!".format(type(obj)))
+        raise TypeError("I can't compare objects' {0} type!".format(type(obj)))
 
     def mapper(self):
         """ Разделяет большой файл на несколько файлов, записывая их в папку temp_directory. 
@@ -87,25 +91,21 @@ class MapReduce:
         """
         LOGGER.info('Mapper is start.')
         if not isinstance(self.reverse, bool):
-            raise TypeError("flag reverse must be a bool, but got {0}:{1}".format(type(self.reverse), self.reverse))
+            raise TypeError("Reverse flag must be a bool, but got {0}:{1}".format(type(self.reverse), self.reverse))
 
-        try:
-            utils.check_directory_path(self.temp_directory)
-        except FileNotFoundError:
-            LOGGER.info("Directory for temp files is not found. Creating this...")
-            os.makedirs(self.temp_directory)
+        os.makedirs(self.temp_directory, exist_ok=True)
 
-        if len(os.listdir(self.temp_directory)) > 0:
-            raise RuntimeError("{0} папка не пуста!".format(self.temp_directory))
+        if os.listdir(self.temp_directory):
+            LOGGER.warning("{0} directory is not empty!".format(self.temp_directory))
 
         with open(self.input_filename, 'r') if self.input_filename is not None else sys.stdin as source_file:
             LOGGER.info('Mapping...')
             if self.size_of_one_piece is None:
-                self.size_of_one_piece = psutil.virtual_memory().free // 10  # этот размер с должен влезать в память
+                self.size_of_one_piece = utils.determine_size_of_one_piece()
                 LOGGER.info("Size of one piece file chosen as {0}.".format(self.size_of_one_piece))
             while True:
                 piece_data = utils.get_next_data_piece(source_file, self.size_of_one_piece, self.separator)
-                if len(piece_data) == 0:
+                if not piece_data:
                     LOGGER.info('Reached the end of file.')
                     break
                 piece_data = self.separator.join(
@@ -122,10 +122,10 @@ class MapReduce:
         None. Алгоритм заканчивает свою работу, когда все кусочки были дочитаны до конца, то есть стали None.
         """
         LOGGER.info('Reducer is  start...')
-        with open(self.output_filename, 'w') if self.output_filename is not None else sys.stdout as output:
+        with open(self.output_filename, 'w') if self.output_filename else sys.stdout as output:
             while True:
                 LOGGER.info("Let's find an extremum among pieces.")
-                extr = None                 # Найдем экстремум.
+                extr = None  # Найдем экстремум.
                 for piece in self.pieces:
                     if piece is None:
                         continue
@@ -148,6 +148,8 @@ class MapReduce:
         LOGGER.info('Reducing is done!')
 
     def clean_up(self, is_debug=False):
-        if not is_debug:
+        if self.temp_directory_object is not None:
+            self.temp_directory_object.cleanup()
+        elif not is_debug:
             shutil.rmtree(self.temp_directory)
             LOGGER.info("Delete temp files.")
