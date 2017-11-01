@@ -1,4 +1,5 @@
 """Модуль со вспомогательными функциями"""
+import cProfile
 import os
 
 
@@ -78,4 +79,14 @@ def determine_size_of_one_piece():
         return psutil.virtual_memory().free // 10
     except ImportError:
         return 2 * 1024 * 1024 * 1024 // 10
+
+def profile(func):
+    """Decorator for run function profile"""
+    def wrapper(*args, **kwargs):
+        profile_filename = func.__name__ + '.prof'
+        profiler = cProfile.Profile()
+        result = profiler.runcall(func, *args, **kwargs)
+        profiler.dump_stats(profile_filename)
+        return result
+    return wrapper
 

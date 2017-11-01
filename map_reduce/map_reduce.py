@@ -23,11 +23,14 @@ class MapReduce:
         """ Конcтруктор класса MapReduce.
         
         Args:
+            input_filename(str): название файла для сортировки или None, если данные поступают с stdin.
+            output_filename(str): название выходного файла или None, если данные идут в stdout.
             separator(str): разделитель между значениями в сортируемом файле.
             temp_directory(str): папка для хранения временных файлов.
             size_of_one_piece(int): примерное место(нижняя граница) для хранения одного куска файла в памяти.
-            input_filename(str): название файла для сортировки или None, если данные поступают с stdin.
             case_sensitive(bool): если сортируются строки, учитывается их регистр, иначе параметр не влияет на работу.
+            reverse(bool): сортировать данные в обратном порядке
+            debug(bool): режим дебаг. logging.debug пишется в лог-файл, temp_directory(если указан не None) не удаляется
             """
         LOGGER.info("Initialization of meta data.")
         self.input_filename = input_filename
@@ -38,10 +41,17 @@ class MapReduce:
         self.temp_directory = self.temp_directory_object.name if not temp_directory else temp_directory
 
         self.size_of_one_piece = size_of_one_piece
+        if self.size_of_one_piece is None:
+            self.size_of_one_piece = utils.determine_size_of_one_piece()
+            LOGGER.info("Size of one piece file chosen as {0}.".format(self.size_of_one_piece))
+
         self.case_sensitive = case_sensitive
         self.reverse = reverse
         self.debug = debug
         self.pieces = []
+
+        self.cache_for_output = []
+        self.cache_size = 0
 
         LOGGER.info("OK. Let's start to sorting.")
         self.run_sorting()
@@ -80,6 +90,7 @@ class MapReduce:
             return obj.lower()
         raise TypeError("I can't compare objects' {0} type!".format(type(obj)))
 
+    @utils.profile
     def mapper(self):
         """ Разделяет большой файл на несколько файлов, записывая их в папку temp_directory. 
         Если такой папки нет, то она будет создана.
@@ -95,14 +106,8 @@ class MapReduce:
 
         os.makedirs(self.temp_directory, exist_ok=True)
 
-        if os.listdir(self.temp_directory):
-            LOGGER.warning("{0} directory is not empty!".format(self.temp_directory))
-
         with open(self.input_filename, 'r') if self.input_filename is not None else sys.stdin as source_file:
             LOGGER.info('Mapping...')
-            if self.size_of_one_piece is None:
-                self.size_of_one_piece = utils.determine_size_of_one_piece()
-                LOGGER.info("Size of one piece file chosen as {0}.".format(self.size_of_one_piece))
             while True:
                 piece_data = utils.get_next_data_piece(source_file, self.size_of_one_piece, self.separator)
                 if not piece_data:
@@ -114,6 +119,7 @@ class MapReduce:
                     piece.Piece(len(self.pieces), piece_data, self.temp_directory))
         LOGGER.info('Mapping is done!')
 
+    @utils.profile
     def reducer(self):
         """ Сливает много отсортированных файлов обратно в 1 файл. 
         Среди всех кусков смотрится верхний еще не добавленный в файл элемент, и из них выбирается экстремум - 
@@ -125,27 +131,48 @@ class MapReduce:
         with open(self.output_filename, 'w') if self.output_filename else sys.stdout as output:
             while True:
                 LOGGER.info("Let's find an extremum among pieces.")
-                extr = None  # Найдем экстремум.
-                for piece in self.pieces:
-                    if piece is None:
-                        continue
-                    element = piece.get_up_element(self.temp_directory, self.separator)
-                    # костыль
-                    expression = extr is None or self.key_sort_piece(extr.data) < self.key_sort_piece(element) if \
-                        self.reverse else extr is None or self.key_sort_piece(extr.data) > self.key_sort_piece(element)
-                    if expression:
-                        extr = extremum.Extremum(element, piece)
-
+                extr = self.get_extremum_among_pieces()
                 if extr is None or extr.data is None:
                     LOGGER.info("All of pieces is empty.")
                     break
                 LOGGER.info("Extremum is {0}".format(extr.data))
-                # экстремум найден, теперь его нужно удалить из соответствующего файла и положить в output.
-                output.write(extr.data + self.separator)
+                self.write_data_to_output(extr.data, output)
                 extr.piece_obj.delete_up_element(self.temp_directory, self.separator)
                 if extr.piece_obj.is_empty(self.temp_directory):
                     self.pieces[extr.piece_obj.index] = None
         LOGGER.info('Reducing is done!')
+
+    def write_data_to_output(self, data, file):
+        self.cache_size += sys.getsizeof(data)
+        self.cache_for_output.append(str(data))
+
+        if self.cache_size >= self.size_of_one_piece / 2:
+            cache = self.separator.join(self.cache_for_output)
+            self.cache_size = 0
+            self.cache_for_output = []
+            print(cache, end=self.separator, file=file)
+
+
+    @utils.profile
+    def get_extremum_among_pieces(self):
+        """
+        Ищет экстремум среди всех верхних элементов кусков
+        Returns:
+            Extremum obj: если экстремум найден
+            None: если экстремума нет, то есть все куски прочитаны до конца
+        """
+        extr = None  # Найдем экстремум.
+        for piece in self.pieces:
+            if piece is None:
+                continue
+            element = piece.get_up_element(self.temp_directory, self.separator)
+            # костыль
+            expression = extr is None or self.key_sort_piece(extr.data) < self.key_sort_piece(element) if \
+                self.reverse else extr is None or self.key_sort_piece(extr.data) > self.key_sort_piece(element)
+            if expression:
+                extr = extremum.Extremum(element, piece)
+        return extr
+
 
     def clean_up(self, is_debug=False):
         if self.temp_directory_object is not None:

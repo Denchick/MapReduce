@@ -45,7 +45,7 @@ def create_parser():
         '-t', '--temp', type=str,
         help='Название каталога для хранения временных файлов. По умолчанию временный каталог из модуля tempfile')
     parser.add_argument(
-        '-p', '--piece', type=int, default=100,
+        '-p', '--piece', type=int,
         help='Примерное количество байт, которое можно использовать в оперативной памяти.')
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
