@@ -1,6 +1,6 @@
 # Внешняя сортировка
 
-Версия 0.2
+Версия 0.3
 
 Автор: Волков Денис (denchick1997@mail.ru)
 
@@ -15,10 +15,10 @@
 
 ## Состав
 
-* Генератор случайных строк: `generators/numbers_generator.py`
-* Генератор случайных чисел `generators/strings_generator.py`
+* Пакет для генераторов случайных значений: `generators/`
+* Генератор случайных чисел `generator.py`
 * Утилита сортировки: `sorter.py`
-* Необходимые модули `map_reduce/`
+* Необходимые модули сортировки `map_reduce/`
 * Тесты: `tests/`
 
 Для запуска тестов можно использовать `runtest.sh` (нужен `bash`, `coverage3`).
@@ -30,7 +30,7 @@
 Пример запуска: 
 
 ```
-./generators/numbers_generator.py -o big.txt -c 1000
+./generator.py number -o big.txt -c 1000
 ./sorter.py -o output.txt -s "\n" big.txt
 ```
 
@@ -44,9 +44,10 @@
 
 ## Что предстоит сделать
 * ~~Добавить возможность для sorter.py принимать данные из stdin~~
+* ~~Добавить логер в пакет generators и generator.py~~
 * Пока не поддерживается работа с csv-таблицами
 * Переделать работу argparse в sorter.py на 3 subprocess
-* *Дописать тесты на map_reduce, отрефакторить test_piece, test_utils* - частично сделано
+* ~~Дописать тесты на map_reduce, отрефакторить test_piece, test_utils~
 * ~~Настроить работу генераторов, добавить модуль logging~~ 
 * ~~Задокумментировать код.~~
 * ~~Исправить debug() на модуль logging в map_reduce~~

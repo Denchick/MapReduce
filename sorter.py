@@ -72,8 +72,6 @@ def main():
         logger.setLevel(logging.DEBUG if args.debug else logging.ERROR)
         logger.addHandler(log)
 
-    LOGGER.info('Application is start.')
-
     map_reduce.MapReduce(
         input_filename=args.filename,
         output_filename=args.output,
