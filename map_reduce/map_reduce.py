@@ -22,21 +22,21 @@ class MapReduce:
                  reverse: bool,
                  debug: bool):
         """ Конcтруктор класса MapReduce.
-        
+
         Args:
-            input_filename(str): название файла для сортировки или None, 
+            input_filename(str): название файла для сортировки или None,
                 если данные поступают с stdin.
-            output_filename(str): название выходного файла или None, 
+            output_filename(str): название выходного файла или None,
                 если данные идут в stdout.
             separator(str): разделитель между значениями в сортируемом файле.
             temp_directory(str): папка для хранения временных файлов.
-            size_of_one_piece(int): примерное место(нижняя граница) для 
+            size_of_one_piece(int): примерное место(нижняя граница) для
                 хранения одного куска файла в памяти.
-            ignore_case(bool): если сортируются строки, то регистр 
+            ignore_case(bool): если сортируются строки, то регистр
                 не учитывается, иначе параметр не влияет на работу.
             numeric_sort(bool): сортировать значения как числа
             reverse(bool): сортировать данные в обратном порядке
-            debug(bool): режим дебаг. logging.debug пишется в лог-файл, 
+            debug(bool): режим дебаг. logging.debug пишется в лог-файл,
                 temp_directory(если указан не None) не удаляется
             """
         LOGGER.info("Initialization of meta data.")
@@ -77,9 +77,9 @@ class MapReduce:
     @property
     def pieces_is_empty(self):
         """ Проверяет, остались ли еще хоть в одном кусочке элементы.
-        
+
         Returns:
-            True, если есть хоть один непрочитанный до конца кусочек, 
+            True, если есть хоть один непрочитанный до конца кусочек,
             иначе False.
         """
         for p in self.pieces:
@@ -88,10 +88,10 @@ class MapReduce:
         return True
 
     def key_sort_piece(self, obj):
-        """ Ключ для сортировки 
+        """ Ключ для сортировки
 
         Returns:
-             comparable object.   
+             comparable object.
         """
         if self.numeric_sort:
             if utils.is_number(obj):
@@ -113,15 +113,15 @@ class MapReduce:
                     'Got not a string in "strings" mode: {0}'.format(obj))
 
     def mapper(self):
-        """ Разделяет большой файл на несколько файлов, записывая их в 
-        папку temp_directory. 
+        """ Разделяет большой файл на несколько файлов, записывая их в
+        папку temp_directory.
         Если такой папки нет, то она будет создана.
-        Внутри каждого кусочка значения разделяются переносом строки и 
+        Внутри каждого кусочка значения разделяются переносом строки и
         сортируются в соответствии с параметрами.
         Размер одного кусочка не меньше, чем size_of_one_piece байт.
-                    
+
         Raises:
-            RuntimeError: если папка для временных файлов оказалась непуста. 
+            RuntimeError: если папка для временных файлов оказалась непуста.
         """
         LOGGER.info('Mapper is start.')
         if not isinstance(self.reverse, bool):
@@ -151,13 +151,13 @@ class MapReduce:
         LOGGER.info('Mapping is done!')
 
     def reducer(self):
-        """ Сливает много отсортированных файлов обратно в 1 файл. 
-        Среди всех кусков смотрится верхний еще не добавленный в файл элемент, 
-        и из них выбирается экстремум - наибольший или наименьший элемент, 
-        в зависимости от настройки алгоритма, а в соответствующем куске 
-        указатель на верхний элемент сдвигается на следующий после него 
-        элемент. Если кусок прочитан до конца, то он становится  None. 
-        Алгоритм заканчивает свою работу, когда все кусочки были дочитаны до 
+        """ Сливает много отсортированных файлов обратно в 1 файл.
+        Среди всех кусков смотрится верхний еще не добавленный в файл элемент,
+        и из них выбирается экстремум - наибольший или наименьший элемент,
+        в зависимости от настройки алгоритма, а в соответствующем куске
+        указатель на верхний элемент сдвигается на следующий после него
+        элемент. Если кусок прочитан до конца, то он становится  None.
+        Алгоритм заканчивает свою работу, когда все кусочки были дочитаны до
         конца, то есть стали None.
         """
         LOGGER.info('Reducer is  start...')
@@ -209,7 +209,8 @@ class MapReduce:
         if extr is None:
             return True
         if self.reverse:
-            return self.key_sort_piece(extr.data) < self.key_sort_piece(element)
+            return self.key_sort_piece(
+                extr.data) < self.key_sort_piece(element)
         return self.key_sort_piece(extr.data) > self.key_sort_piece(element)
 
     def clean_up(self):

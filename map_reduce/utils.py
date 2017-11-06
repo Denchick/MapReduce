@@ -4,11 +4,11 @@ import os
 
 
 def is_number(value):
-    """ Проверяет, является ли value целым числом или вещественным. 
+    """ Проверяет, является ли value целым числом или вещественным.
 
     Args:
         value (object): значение, которое нужно проверить.
-         
+
     Returns:
         True, если value int или float, иначе False.
     """
@@ -20,17 +20,17 @@ def is_number(value):
 
 
 def get_next_data_piece(file, size_of_piece, separator):
-    """ Возвращает кусок данных из открытого на чтение файла file, размера 
+    """ Возвращает кусок данных из открытого на чтение файла file, размера
     минимум size_of_piece, пока не встретит separator или EOF.
 
     Args:
-        file(readable object): файл, открытый на чтение. В общем случае, 
+        file(readable object): файл, открытый на чтение. В общем случае,
             объект, для которого определен метод read().
-        size_of_piece(int): примерное количество байт(нижняя граница), 
-            отводимое для одного куска файла. 
+        size_of_piece(int): примерное количество байт(нижняя граница),
+            отводимое для одного куска файла.
         separator (str): разделитель между значениями.
 
-    Returns:    
+    Returns:
         Строку str - следующий фрагмент файла.
 
     Raises:
@@ -60,7 +60,7 @@ def get_next_data_piece(file, size_of_piece, separator):
 
 def check_file_path(path):
     """ Проверяет, что файл по пути path существует.
-    
+
     Args:
         path: путь до файла.
 
@@ -77,12 +77,14 @@ def check_file_path(path):
         raise FileNotFoundError("File '{0}' does not exist.".format(path))
     return True
 
+
 def determine_size_of_one_piece():
     try:
         import psutil
         return psutil.virtual_memory().free // 10
     except ImportError:
         return 2 * 1024 * 1024 * 1024 // 10
+
 
 def profile(func):
     """Decorator for run function profile"""
@@ -93,4 +95,3 @@ def profile(func):
         profiler.dump_stats(profile_filename)
         return result
     return wrapper
-

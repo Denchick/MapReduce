@@ -29,7 +29,7 @@ class TestMapReduce(unittest.TestCase):
 
     def create_file_for_sorting(self, data):
         """ Создает тестовый файл для сортировки
-        
+
         Args:
             data (str): строка - данные, которые нужно записать в файл
         """
@@ -180,6 +180,7 @@ class TestMapReduce(unittest.TestCase):
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('1 2 3 4', actual)
+
 
 if __name__ == "__main__":
     unittest.main()

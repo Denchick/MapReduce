@@ -39,7 +39,7 @@ def parse_range(range_as_string):
     if a <= 0 or b <= 0:
         raise ValueError(
             'Длина строки не может иметь не положительную длину: {}'
-                         .format(min(a, b)))
+            .format(min(a, b)))
     return min(a, b), max(a, b)
 
 
@@ -53,7 +53,7 @@ def write_to_file(list_data, separator, filename):
 
 
 def generate_list_data(args):
-    """ По аргументам определяет, какой режим программы выбран и запускает 
+    """ По аргументам определяет, какой режим программы выбран и запускает
     генераторы. Возвращается список строк - сгенерированные значения """
     if 'lowercase' in dir(args):
         return strings_generator.StringGenerator(args.digits,
@@ -68,8 +68,8 @@ def generate_list_data(args):
 
 
 def create_parser():
-    description = """Генератор случайных значений. 
-    По умолчанию генерирует 10 строк, состоящих из цифр, прописных и 
+    description = """Генератор случайных значений.
+    По умолчанию генерирует 10 строк, состоящих из цифр, прописных и
     заглавных букв английского алфавита, разделенных переносом строки."""
     parser = argparse.ArgumentParser(
         description=description)
@@ -101,8 +101,8 @@ def create_number_subparser(subparsers):
     number_parser = subparsers.add_parser('numbers', help="Генарация чисел")
     number_parser.add_argument(
         '-r', '--range', type=parse_range, default=(-100, 100),
-        help="""Диапазон генерируемых чисел в формате 
-        (leftBorder, rightBorder). Границы включаются. 
+        help="""Диапазон генерируемых чисел в формате
+        (leftBorder, rightBorder). Границы включаются.
         По умолчанию (-100,100).""")
 
 
@@ -110,8 +110,8 @@ def create_string_subparser(subparsers):
     string_parser = subparsers.add_parser('strings', help="Генерация строк")
     string_parser.add_argument(
         '-r', '--range', type=parse_range, default=(-100, 100),
-        help="""Диапазон длин генерируемых строк в формате 
-        (leftBorder, rightBorder). Границы включаются. 
+        help="""Диапазон длин генерируемых строк в формате
+        (leftBorder, rightBorder). Границы включаются.
         По умолчанию (-100,100).""")
     string_parser.add_argument(
         '-di', '--digits',
@@ -128,7 +128,7 @@ def create_string_subparser(subparsers):
     string_parser.add_argument(
         '-sp', '--special',
         action='store_true', default=False,
-        help="""В алфавите генерации есть специальные 
+        help="""В алфавите генерации есть специальные
         символы из string.punctuation.""")
 
 

@@ -19,6 +19,7 @@ class NumberGenerator:
     def generate(self):
         LOGGER.info('Запуск генерации.')
         result = [self.get_random_number() for _ in range(self.count)]
-        LOGGER.info('Сгенерировано {} значений в диапазоне {}.'.format(self.count, self.range))
+        LOGGER.info(
+            'Сгенерировано {} значений в диапазоне {}.'.format(
+                self.count, self.range))
         return result
-
