@@ -31,11 +31,12 @@ class StringGenerator:
             chars += string.ascii_uppercase
         if has_special:
             chars += string.punctuation
-        if not has_digits and not has_lower and not has_upper and not has_special:
+        if chars == '':
             chars = string.ascii_letters + string.digits + \
                 string.punctuation  # = digits + upper + lower + special
             LOGGER.info(
-                'Строки будут состоять из цифр, строчных и прописных букв, специальных символов.')
+                """Строки будут состоять из цифр, строчных и прописных букв, 
+                специальных символов.""")
         return chars
 
     def generate(self):
