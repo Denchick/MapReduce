@@ -16,10 +16,10 @@ class MapReduce:
                  separator: str,
                  temp_directory: str,
                  size_of_one_piece: int,
-                 case_sensitive: bool = True,
-                 reverse: bool = False,
-                 debug: bool = False,
-                 *args):
+                 reverse: bool,
+                 debug: bool,
+                 mode: str,
+                 **kwargs):
         """ Конcтруктор класса MapReduce.
         
         Args:
@@ -45,9 +45,12 @@ class MapReduce:
             self.size_of_one_piece = utils.determine_size_of_one_piece()
             LOGGER.info("Size of one piece file chosen as {0}.".format(self.size_of_one_piece))
 
-        self.case_sensitive = case_sensitive
         self.reverse = reverse
         self.debug = debug
+
+        self.mode = mode
+        self.initialization_modes_variables(**kwargs)
+
         self.pieces = []
 
         self.cache_for_output = []
@@ -55,6 +58,12 @@ class MapReduce:
 
         LOGGER.info("OK. Let's start to sorting.")
         self.run_sorting()
+
+    def initialization_modes_variables(self, **kwargs):
+        if self.mode == 'numbers':
+            pass
+        elif self.mode == 'strings':
+            self.case_sensitive = kwargs['case_sensitive']
 
     def run_sorting(self):
         self.mapper()
@@ -75,22 +84,27 @@ class MapReduce:
 
     def key_sort_piece(self, obj):
         """ Ключ для сортировки 
-        
+
         Returns:
              comparable object.   
         """
-        if utils.is_number(obj):
-            try:
-                return int(obj)
-            except ValueError:
-                return float(obj)
-        if isinstance(obj, str):
-            if self.case_sensitive:
-                return obj
-            return obj.lower()
-        raise TypeError("I can't compare objects' {0} type!".format(type(obj)))
+        if self.mode == 'numbers':
+            if utils.is_number(obj):
+                try:
+                    return int(obj)
+                except ValueError:
+                    return float(obj)
+            else:
+                raise RuntimeError('Got not a number in "numbers" mode: {0}'.format(obj))
 
-    @utils.profile
+        elif self.mode == 'strings':
+            if isinstance(obj, str):
+                if self.case_sensitive:
+                    return obj
+                return obj.lower()
+            else:
+                raise RuntimeError('Got not a string in "strings" mode: {0}'.format(obj))
+
     def mapper(self):
         """ Разделяет большой файл на несколько файлов, записывая их в папку temp_directory. 
         Если такой папки нет, то она будет создана.
@@ -119,7 +133,6 @@ class MapReduce:
                     piece.Piece(len(self.pieces), piece_data, self.temp_directory))
         LOGGER.info('Mapping is done!')
 
-    @utils.profile
     def reducer(self):
         """ Сливает много отсортированных файлов обратно в 1 файл. 
         Среди всех кусков смотрится верхний еще не добавленный в файл элемент, и из них выбирается экстремум - 
@@ -152,8 +165,6 @@ class MapReduce:
             self.cache_for_output = []
             print(cache, end=self.separator, file=file)
 
-
-    @utils.profile
     def get_extremum_among_pieces(self):
         """
         Ищет экстремум среди всех верхних элементов кусков
@@ -166,13 +177,11 @@ class MapReduce:
             if piece is None:
                 continue
             element = piece.get_up_element(self.temp_directory, self.separator)
-            # костыль
             expression = extr is None or self.key_sort_piece(extr.data) < self.key_sort_piece(element) if \
                 self.reverse else extr is None or self.key_sort_piece(extr.data) > self.key_sort_piece(element)
             if expression:
                 extr = extremum.Extremum(element, piece)
         return extr
-
 
     def clean_up(self, is_debug=False):
         if self.temp_directory_object is not None:

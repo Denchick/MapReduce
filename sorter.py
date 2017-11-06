@@ -21,7 +21,7 @@ except Exception as e:
     print('Модули не найдены: "{}"'.format(e), file=sys.stderr)
     sys.exit(ERROR_MODULES_MISSING)
 
-__version__ = '0.2'
+__version__ = '0.3'
 __author__ = 'Volkov Denis'
 __email__ = 'denchick1997@mail.ru'
 
@@ -34,7 +34,16 @@ def create_parser():
     parser = argparse.ArgumentParser(
         description="""Внешняя сортировка файла, не помещающегося в оперативную память. Если не указывать файл, 
         то данные будут браться из sys.stdin.""")
+    initialize_common_arguments(parser)
 
+    subparsers = parser.add_subparsers(help='commands', dest='mode')
+    create_number_subparser(subparsers)
+    create_string_subparser(subparsers)
+
+    return parser.parse_args()
+
+
+def initialize_common_arguments(parser):
     parser.add_argument(
         '-f', '--filename', type=str,
         help='Файл, который необходимо отсортировать. По умолчанию данные берутся из stdin.')
@@ -48,16 +57,32 @@ def create_parser():
         '-p', '--piece', type=int,
         help='Примерное количество байт, которое можно использовать в оперативной памяти.')
     parser.add_argument(
-        '-s', '--separator', type=str, default='\n',
-        help='Разделитель между значениями в исходном и отсортированном файле. По умолчанию перевод строки.')
-    parser.add_argument(
         '-r', '--reverse', action='store_true', default=False, help='Сортировка в обратном порядке')
-    parser.add_argument(
-        '-c', '--case_sensitive', action='store_true', default=False, help='Регистрозависимая сортировка строк.')
     parser.add_argument(
         '-d', '--debug', action='store_true', default=False, help="""Режим debug. Временные файлы не удаляются. Warning! 
         В этом режиме папку с временными файлами необходимо удалять самостоятельно во избежание падения утилиты.""")
-    return parser.parse_args()
+
+
+def create_number_subparser(subparsers):
+    number_parser = subparsers.add_parser('numbers', help="Сортировка чисел")
+    number_parser.add_argument(
+        '-s', '--separator', type=str, default='\n',
+        help='Разделитель между значениями в исходном и отсортированном файле. По умолчанию перевод строки.')
+
+
+def create_string_subparser(subparsers):
+    string_parser = subparsers.add_parser('strings', help="Сортировка строк")
+    string_parser.add_argument(
+        '-s', '--separator', type=str, default='\n',
+        help='Разделитель между значениями в исходном и отсортированном файле. По умолчанию перевод строки.')
+    string_parser.add_argument(
+        '-c', '--case_sensitive', action='store_true', default=False, help='Регистрозависимая сортировка строк.')
+
+
+def get_separator(args):
+    if 'separator' in dir(args):
+        return args.separator.encode().decode('unicode-escape')
+    return '\n'
 
 
 def main():
@@ -72,15 +97,17 @@ def main():
         logger.setLevel(logging.DEBUG if args.debug else logging.ERROR)
         logger.addHandler(log)
 
+
     map_reduce.MapReduce(
         input_filename=args.filename,
         output_filename=args.output,
-        separator=args.separator.encode().decode('unicode-escape'),
+        separator=get_separator(args),
         temp_directory=args.temp,
         size_of_one_piece=args.piece,
         case_sensitive=args.case_sensitive,
         reverse=args.reverse,
-        debug=args.debug)
+        debug=args.debug,
+        **vars(args))
 
 
 if __name__ == "__main__":
