@@ -35,7 +35,7 @@ class StringGenerator:
             chars = string.ascii_letters + string.digits + \
                 string.punctuation  # = digits + upper + lower + special
             LOGGER.info(
-                """Строки будут состоять из цифр, строчных и прописных букв, 
+                """Строки будут состоять из цифр, строчных и прописных букв,
                 специальных символов.""")
         return chars
 
