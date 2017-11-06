@@ -24,8 +24,10 @@ def get_next_data_piece(file, size_of_piece, separator):
     минимум size_of_piece, пока не встретит separator или EOF.
 
     Args:
-        file(readable object): файл, открытый на чтение. В общем случае, объект, для которого определен метод read().
-        size_of_piece(int): примерное количество байт(нижняя граница), отводимое для одного куска файла. 
+        file(readable object): файл, открытый на чтение. В общем случае, 
+            объект, для которого определен метод read().
+        size_of_piece(int): примерное количество байт(нижняя граница), 
+            отводимое для одного куска файла. 
         separator (str): разделитель между значениями.
 
     Returns:    
@@ -37,9 +39,11 @@ def get_next_data_piece(file, size_of_piece, separator):
         AttributeError: если file не имеет атрибут read().
         """
     if not isinstance(size_of_piece, int):
-        raise TypeError('"Size of one piece must be an integer but {0}:{1}'.format(type(size_of_piece), size_of_piece))
+        raise TypeError('"Size of one piece must be an integer but {0}:{1}'
+                        .format(type(size_of_piece), size_of_piece))
     if not isinstance(separator, str):
-        raise TypeError('Separator must be a string, but {0}:{1}'.format(type(separator), separator))
+        raise TypeError('Separator must be a string, but {0}:{1}'
+                        .format(type(separator), separator))
     try:
         result = file.read(size_of_piece)
         if result.endswith(separator):

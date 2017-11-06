@@ -56,9 +56,11 @@ class TestPiece(unittest.TestCase):
         p.move_data_pointer(1)
         self.assertEqual(p.get_up_element(self.directory, separator), 'irst')
         p.move_data_pointer(4)
-        self.assertEqual(p.get_up_element(self.directory, separator), 'second')
+        self.assertEqual(p.get_up_element(self.directory, separator),
+                         'second')
         p.move_data_pointer(1)
-        self.assertEqual(p.get_up_element(self.directory, separator), 'second')
+        self.assertEqual(p.get_up_element(self.directory, separator),
+                         'second')
 
     def test_move_data_pointer(self):
         data = '\n'.join(['first', 'second', 'third'])

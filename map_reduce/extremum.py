@@ -7,8 +7,9 @@ class Extremum:
 
         Args:
             data (str): верхний элемент piece_obj.
-            piece_obj (piece.Piece): объект соответствующего маленького файла - куска.
-        
+            piece_obj (piece.Piece): объект соответствующего маленького 
+            файла - куска.
+            
         Raises:
             TypeError: если piece_obj не является объектом piece.Piece.
         """

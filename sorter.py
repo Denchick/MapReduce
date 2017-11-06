@@ -32,34 +32,46 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 def create_parser():
     """ Разбор аргументов командной строки """
     parser = argparse.ArgumentParser(
-        description="""Внешняя сортировка файла, не помещающегося в оперативную память. Если не указывать файл, 
-        то данные будут браться из sys.stdin.""")
+        description="""Внешняя сортировка файла, не помещающегося 
+        в оперативную память. Если не указывать файл, то данные 
+        будут браться из sys.stdin.""")
     parser.add_argument(
         '-f', '--filename', type=str,
-        help='Файл, который необходимо отсортировать. По умолчанию данные берутся из stdin.')
+        help="""Файл, который необходимо отсортировать. 
+        По умолчанию данные берутся из stdin.""")
     parser.add_argument(
         '-o', '--output', type=str,
-        help='Название выхода - отсортированного файла. По умолчанию данные направлены в stdout.')
+        help="""Название выхода - отсортированного файла. 
+        По умолчанию данные направлены в stdout.""")
     parser.add_argument(
         '-t', '--temp', type=str,
-        help='Каталог для хранения временных файлов. По умолчанию создается временный каталог из модуля tempfile')
+        help="""Каталог для хранения временных файлов. 
+        По умолчанию создается временный каталог из модуля tempfile""")
     parser.add_argument(
         '-p', '--piece', type=int,
-        help='Примерное количество байт, которое можно использовать в оперативной памяти.')
+        help="""Примерное количество байт, которое можно 
+        использовать в оперативной памяти.""")
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
-        help='Разделитель между значениями в исходном и отсортированном файле. По умолчанию перевод строки.')
+        help="""Разделитель между значениями в исходном и отсортированном 
+        файле. По умолчанию перевод строки.""")
     parser.add_argument(
-        '-i', '--ignore-case', action='store_true', default=False, help="Игнорирование регистра символов")
+        '-i', '--ignore-case', action='store_true', default=False,
+        help="Игнорирование регистра символов")
     parser.add_argument(
-        '-n', '--numeric-sort', action='store_true', default=False, help="Сравнивать значения как числа")
+        '-n', '--numeric-sort', action='store_true', default=False,
+        help="Сравнивать значения как числа")
     parser.add_argument(
-        '-r', '--reverse', action='store_true', default=False, help='Сортировка в обратном порядке')
+        '-r', '--reverse', action='store_true', default=False,
+        help='Сортировка в обратном порядке')
     parser.add_argument(
-        '-d', '--debug', action='store_true', default=False, help="""Режим debug. Временные файлы не удаляются. Warning! 
-        В этом режиме папку с временными файлами необходимо удалять самостоятельно во избежание падения утилиты.""")
+        '-d', '--debug', action='store_true', default=False,
+        help="""Режим debug. Временные файлы не удаляются. Warning! 
+        В этом режиме папку с временными файлами необходимо удалять 
+        самостоятельно во избежание падения утилиты.""")
     parser.add_argument(
-        '--version', action='store_true', default=False, help="Печатает версию утилиты и выходит.")
+        '--version', action='store_true', default=False,
+        help="Печатает версию утилиты и выходит.")
 
     return parser.parse_args()
 

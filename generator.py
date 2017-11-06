@@ -37,7 +37,8 @@ def parse_range(range_as_string):
         raise ValueError('"{0}" не диапазон значений'.format(range_as_string))
     a, b = int(m.group(1)), int(m.group(2))
     if a <= 0 or b <= 0:
-        raise ValueError('Длина строки не может иметь не положительную длину: {}'
+        raise ValueError(
+            'Длина строки не может иметь не положительную длину: {}'
                          .format(min(a, b)))
     return min(a, b), max(a, b)
 
@@ -52,26 +53,33 @@ def write_to_file(list_data, separator, filename):
 
 
 def generate_list_data(args):
-    """ По аргументам определяет, какой режим программы выбран и запускает генераторы. 
-    Возвращается список строк - сгенерированные значения """
+    """ По аргументам определяет, какой режим программы выбран и запускает 
+    генераторы. Возвращается список строк - сгенерированные значения """
     if 'lowercase' in dir(args):
-        return strings_generator.StringGenerator(args.digits, args.uppercase, args.lowercase,
-                                                 args.special, args.count, args.range).generate()
-    return numbers_generator.NumberGenerator(args.count, args.range).generate()
+        return strings_generator.StringGenerator(args.digits,
+                                                 args.uppercase,
+                                                 args.lowercase,
+                                                 args.special,
+                                                 args.count,
+                                                 args.range)\
+            .generate()
+    return numbers_generator.NumberGenerator(args.count, args.range)\
+        .generate()
 
 
 def create_parser():
     description = """Генератор случайных значений. 
-    По умолчанию генерирует 10 строк, состоящих из цифр, прописных и заглавных букв английского алфавита,
-    разделенных переносом строки."""
+    По умолчанию генерирует 10 строк, состоящих из цифр, прописных и 
+    заглавных букв английского алфавита, разделенных переносом строки."""
     parser = argparse.ArgumentParser(
         description=description)
 
     parser.add_argument(
-        '-o', '--output', type=str, help='Имя выходного файла. По умолчанию выход направлен в stdout.')
+        '-o', '--output', type=str,
+        help='Имя выходного файла. По умолчанию выход направлен в stdout.')
     parser.add_argument(
         '-s', '--separator', type=str, default='\n',
-        help='Разделитель между значениями. По умолчанию перевод строки - \\n.')
+        help='Разделитель между значениями. По умолчанию перевод строки.')
     parser.add_argument(
         '-c', '--count', type=int, default=10,
         help='Количество генерируемых значений. По умолчанию 10.')
@@ -79,7 +87,8 @@ def create_parser():
         '-d', '--debug',
         action='store_true', help='Режим debug.', default=False)
     parser.add_argument(
-        '--version', action='store_true', default=False, help="Печатает версию утилиты и выходит.")
+        '--version', action='store_true', default=False,
+        help="Печатает версию утилиты и выходит.")
 
     subparsers = parser.add_subparsers(help='commands')
     create_number_subparser(subparsers)
@@ -92,7 +101,8 @@ def create_number_subparser(subparsers):
     number_parser = subparsers.add_parser('numbers', help="Генарация чисел")
     number_parser.add_argument(
         '-r', '--range', type=parse_range, default=(-100, 100),
-        help="""Диапазон генерируемых чисел в формате (leftBorder, rightBorder). Границы включаются. 
+        help="""Диапазон генерируемых чисел в формате 
+        (leftBorder, rightBorder). Границы включаются. 
         По умолчанию (-100,100).""")
 
 
@@ -100,20 +110,26 @@ def create_string_subparser(subparsers):
     string_parser = subparsers.add_parser('strings', help="Генерация строк")
     string_parser.add_argument(
         '-r', '--range', type=parse_range, default=(-100, 100),
-        help="""Диапазон длин генерируемых строк в формате (leftBorder, rightBorder). Границы включаются. 
+        help="""Диапазон длин генерируемых строк в формате 
+        (leftBorder, rightBorder). Границы включаются. 
         По умолчанию (-100,100).""")
     string_parser.add_argument(
         '-di', '--digits',
-        action='store_true', help='В алфавите генерации есть цифры.', default=False)
+        action='store_true', default=False,
+        help='В алфавите генерации есть цифры.')
     string_parser.add_argument(
         '-up', '--uppercase',
-        action='store_true', help='В алфавите генерации есть прописные буквы.', default=False)
+        action='store_true', default=False,
+        help='В алфавите генерации есть прописные буквы.')
     string_parser.add_argument(
         '-lo', '--lowercase',
-        action='store_true', help='В алфавите генерации есть строчные буквы.', default=False)
+        action='store_true', default=False,
+        help='В алфавите генерации есть строчные буквы.')
     string_parser.add_argument(
         '-sp', '--special',
-        action='store_true', help='В алфавите генерации есть специальные символы из string.punctuation.', default=False)
+        action='store_true', default=False,
+        help="""В алфавите генерации есть специальные 
+        символы из string.punctuation.""")
 
 
 def main():
@@ -125,8 +141,8 @@ def main():
     log = logging.StreamHandler(sys.stderr)
     log.setFormatter(logging.Formatter(
         '%(asctime)s [%(levelname)s <%(name)s>] %(message)s'))
-    for module in (sys.modules[__name__], strings_generator, numbers_generator):
-        logger = logging.getLogger(module.LOGGER_NAME)
+    for mod in (sys.modules[__name__], strings_generator, numbers_generator):
+        logger = logging.getLogger(mod.LOGGER_NAME)
         logger.setLevel(logging.DEBUG if args.debug else logging.ERROR)
         logger.addHandler(log)
 
