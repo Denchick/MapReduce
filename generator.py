@@ -56,15 +56,11 @@ def generate_list_data(args):
     """ По аргументам определяет, какой режим программы выбран и запускает
     генераторы. Возвращается список строк - сгенерированные значения """
     if 'lowercase' in dir(args):
-        return strings_generator.StringGenerator(args.digits,
-                                                 args.uppercase,
-                                                 args.lowercase,
-                                                 args.special,
-                                                 args.count,
-                                                 args.range)\
-            .generate()
-    return numbers_generator.NumberGenerator(args.count, args.range)\
-        .generate()
+        return strings_generator.StringGenerator(
+            args.digits, args.uppercase, args.lowercase,
+            args.special, args.count, args.range).generate()
+    return numbers_generator.NumberGenerator(
+        args.count, args.range).generate()
 
 
 def create_parser():
@@ -136,7 +132,7 @@ def main():
     args = create_parser()
     if args.version:
         print(__version__)
-        exit()
+        sys.exit()
 
     log = logging.StreamHandler(sys.stderr)
     log.setFormatter(logging.Formatter(

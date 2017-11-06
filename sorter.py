@@ -81,7 +81,7 @@ def main():
 
     if args.version:
         print(__version__)
-        exit()
+        sys.exit()
 
     log = logging.StreamHandler(sys.stderr)
     log.setFormatter(logging.Formatter(
