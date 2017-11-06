@@ -17,7 +17,7 @@ class Piece:
             raise TypeError("Name of directory must be a string but {0}:{1}."
                             .format(type(data), data))
         if not os.path.isdir(directory):
-            raise AttributeError("Directory path '{0}' is incorrect"
+            raise TypeError("Directory path '{0}' is incorrect"
                                  .format(directory))
 
         self.index = index
