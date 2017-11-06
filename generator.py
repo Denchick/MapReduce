@@ -78,6 +78,8 @@ def create_parser():
     parser.add_argument(
         '-d', '--debug',
         action='store_true', help='Режим debug.', default=False)
+    parser.add_argument(
+        '--version', action='store_true', default=False, help="Печатает версию утилиты и выходит.")
 
     subparsers = parser.add_subparsers(help='commands')
     create_number_subparser(subparsers)
@@ -116,6 +118,9 @@ def create_string_subparser(subparsers):
 
 def main():
     args = create_parser()
+    if args.version:
+        print(__version__)
+        exit()
 
     log = logging.StreamHandler(sys.stderr)
     log.setFormatter(logging.Formatter(

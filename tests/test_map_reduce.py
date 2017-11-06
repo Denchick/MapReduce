@@ -1,6 +1,4 @@
-import random
 import unittest
-import shutil
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -48,9 +46,10 @@ class TestMapReduce(unittest.TestCase):
             separator=' ',
             temp_directory=self.directory,
             size_of_one_piece=10,
+            ignore_case=False,
+            numeric_sort=True,
             reverse=False,
-            debug=False,
-            mode='numbers')
+            debug=False)
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('1 2 3 4', actual)
@@ -65,9 +64,10 @@ class TestMapReduce(unittest.TestCase):
             separator=' ',
             temp_directory=self.directory,
             size_of_one_piece=4,
+            ignore_case=False,
+            numeric_sort=True,
             reverse=False,
-            debug=False,
-            mode='numbers')
+            debug=False)
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('1 2 3 4', actual)
@@ -82,9 +82,10 @@ class TestMapReduce(unittest.TestCase):
             separator=' ',
             temp_directory=self.directory,
             size_of_one_piece=100,
+            ignore_case=False,
+            numeric_sort=True,
             reverse=False,
-            debug=False,
-            mode='numbers')
+            debug=False)
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('1 2 11', actual)
@@ -99,9 +100,10 @@ class TestMapReduce(unittest.TestCase):
             separator='\n',
             temp_directory=self.directory,
             size_of_one_piece=4,
+            ignore_case=False,
+            numeric_sort=True,
             reverse=False,
-            debug=False,
-            mode='numbers')
+            debug=False)
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('0 6 94 96 97 99 100', actual.replace('\n', ' ', 10))
@@ -116,9 +118,10 @@ class TestMapReduce(unittest.TestCase):
             separator=' ',
             temp_directory=self.directory,
             size_of_one_piece=5,
+            ignore_case=False,
+            numeric_sort=True,
             reverse=False,
-            debug=False,
-            mode='numbers')
+            debug=False)
 
         expected = '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20'
         actual = self.get_data_from_file(self.output_filename)
@@ -134,9 +137,10 @@ class TestMapReduce(unittest.TestCase):
             separator=' ',
             temp_directory=self.directory,
             size_of_one_piece=4,
+            ignore_case=False,
+            numeric_sort=True,
             reverse=True,
-            debug=False,
-            mode='numbers')
+            debug=False)
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('4 3 2 1', actual)
@@ -151,9 +155,10 @@ class TestMapReduce(unittest.TestCase):
             separator=' ',
             temp_directory=self.directory,
             size_of_one_piece=4,
+            ignore_case=False,
+            numeric_sort=True,
             reverse=False,
-            debug=False,
-            mode='numbers')
+            debug=False)
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('-5 -4 -3 -2 -1 0 1 2 3 4 5', actual)
@@ -168,9 +173,10 @@ class TestMapReduce(unittest.TestCase):
             separator=' ',
             temp_directory=None,
             size_of_one_piece=10,
+            ignore_case=False,
+            numeric_sort=True,
             reverse=False,
-            debug=False,
-            mode='numbers')
+            debug=False)
 
         actual = self.get_data_from_file(self.output_filename)
         self.assertEqual('1 2 3 4', actual)

@@ -11,15 +11,16 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 
 
 class MapReduce:
-    def __init__(self, input_filename: str,
+    def __init__(self,
+                 input_filename: str,
                  output_filename: str,
                  separator: str,
                  temp_directory: str,
                  size_of_one_piece: int,
+                 ignore_case: bool,
+                 numeric_sort: bool,
                  reverse: bool,
-                 debug: bool,
-                 mode: str,
-                 **kwargs):
+                 debug: bool):
         """ Конcтруктор класса MapReduce.
         
         Args:
@@ -28,7 +29,8 @@ class MapReduce:
             separator(str): разделитель между значениями в сортируемом файле.
             temp_directory(str): папка для хранения временных файлов.
             size_of_one_piece(int): примерное место(нижняя граница) для хранения одного куска файла в памяти.
-            case_sensitive(bool): если сортируются строки, учитывается их регистр, иначе параметр не влияет на работу.
+            ignore_case(bool): если сортируются строки, то регистр не учитывается, иначе параметр не влияет на работу.
+            numeric_sort(bool): сортировать значения как числа
             reverse(bool): сортировать данные в обратном порядке
             debug(bool): режим дебаг. logging.debug пишется в лог-файл, temp_directory(если указан не None) не удаляется
             """
@@ -48,8 +50,8 @@ class MapReduce:
         self.reverse = reverse
         self.debug = debug
 
-        self.mode = mode
-        self.initialization_modes_variables(**kwargs)
+        self.numeric_sort = numeric_sort
+        self.ignore_case = ignore_case
 
         self.pieces = []
 
@@ -59,16 +61,10 @@ class MapReduce:
         LOGGER.info("OK. Let's start to sorting.")
         self.run_sorting()
 
-    def initialization_modes_variables(self, **kwargs):
-        if self.mode == 'numbers':
-            pass
-        elif self.mode == 'strings':
-            self.case_sensitive = kwargs['case_sensitive']
-
     def run_sorting(self):
         self.mapper()
         self.reducer()
-        self.clean_up(self.debug)
+        self.clean_up()
 
     @property
     def pieces_is_empty(self):
@@ -88,7 +84,7 @@ class MapReduce:
         Returns:
              comparable object.   
         """
-        if self.mode == 'numbers':
+        if self.numeric_sort:
             if utils.is_number(obj):
                 try:
                     return int(obj)
@@ -97,11 +93,11 @@ class MapReduce:
             else:
                 raise RuntimeError('Got not a number in "numbers" mode: {0}'.format(obj))
 
-        elif self.mode == 'strings':
+        else:
             if isinstance(obj, str):
-                if self.case_sensitive:
-                    return obj
-                return obj.lower()
+                if self.ignore_case:
+                    return obj.lower()
+                return obj
             else:
                 raise RuntimeError('Got not a string in "strings" mode: {0}'.format(obj))
 
@@ -153,13 +149,14 @@ class MapReduce:
                 extr.piece_obj.delete_up_element(self.temp_directory, self.separator)
                 if extr.piece_obj.is_empty(self.temp_directory):
                     self.pieces[extr.piece_obj.index] = None
+            self.write_data_to_output('', output, reducer_is_end=True)
         LOGGER.info('Reducing is done!')
 
-    def write_data_to_output(self, data, file):
+    def write_data_to_output(self, data, file, reducer_is_end=False):
         self.cache_size += sys.getsizeof(data)
         self.cache_for_output.append(str(data))
 
-        if self.cache_size >= self.size_of_one_piece / 2:
+        if reducer_is_end or self.cache_size >= self.size_of_one_piece / 2:
             cache = self.separator.join(self.cache_for_output)
             self.cache_size = 0
             self.cache_for_output = []
@@ -183,9 +180,12 @@ class MapReduce:
                 extr = extremum.Extremum(element, piece)
         return extr
 
-    def clean_up(self, is_debug=False):
+    def clean_up(self):
+        """
+        Удаляет после работы утилиты временные файлы
+        """
         if self.temp_directory_object is not None:
             self.temp_directory_object.cleanup()
-        elif not is_debug:
+        elif not self.debug:
             shutil.rmtree(self.temp_directory)
-            LOGGER.info("Delete temp files.")
+            LOGGER.info("Temp files are deleted.")
