@@ -1,43 +1,36 @@
-# Внешняя сортировка
+# External sorting
 
-Версия 1.0
+# Description
 
-Автор: Волков Денис (denchick1997@mail.ru)
+This utility can be used to sort files that do not fit in the RAM and consist of numbers or lines. It is also possible to set sorting parameters (in reverse order, case insensitive, etc.).
 
-# Описание
-
-Данная утилита может быть использована для сортировки файлов, не помещающихся в оперативную память и состоящих из чисел или строк. При этом, есть возможность установления параметров сортировки (в обратном порядке, без учета регистра, etc.).
-
-# Требования
+# Dependencies
 
 * Python 3
-* Модули psutil и shutil
+* psutil and shutil modules
 
-# Состав
+# Package structure
 
-* Пакет для генераторов случайных значений: `generators / `
-* Генератор случайных чисел, строк `generator.py`
-* Утилита сортировки: `sorter.py`
-* Необходимые модули сортировки `map_reduce / `
-* Тесты: `tests / `
+* Random values generator `generator.py`
+* Entry point: `sorter.py`
+* Internal modules `map_reduce / `
+* Tests: `tests / `
 
-Для запуска тестов можно использовать `runtest.sh` (нужен `bash`, `coverage3`).
+Modules `piece`, `utils`, `map_reduce` have tests and can be found in `/tests`.
 
-# Запуск
+You can use `runtest.sh` (you need `bash`, `coverage3`) to run the tests.
 
-Справка по запуску: `. / sorter.py - -help`
+# How to run
 
-Пример запуска:
+Help: `. / sorter.py - -help`
+
+Example:
 
 ```
 . / generator.py - o big - c 1000 numbers
 . / sorter.py - f big.txt - o output - n
 ```
 
-где `big` - файл, который необходимо отсортировать.
+# Details
 
-# Подробности реализации
-
-В основе реализации лежит алгоритм [MapReduce](https: // en.wikipedia.org / wiki / MapReduce), в котором большой файл разбивается на маленькие(каждый из которых возможно уместить в оперативную память), данные внутри каждого куска сортируются, а потом все фрагменты сливаются в одно целое. Модули, отвечающие за сортировку, находятся в пакете `map_reduce`. За сущность "фрагмент" отвечает модуль `piece.Piece`.
-
-На модули `piece`, `utils`, `map_reduce` написаны тесты, их можно найти в `tests / `.
+The implementation is based on the algorithm [MapReduce](https: // en.wikipedia.org / wiki / MapReduce), in which a large file is broken up into small ones (each of which can be placed in the RAM), the data inside each piece is sorted and then all the pieces are merged into one. The modules responsible for sorting are in the `map_reduce` package. The `piece.Piece` module is responsible for the essence of the `fragment`.
